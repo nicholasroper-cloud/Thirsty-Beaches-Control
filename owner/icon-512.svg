@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Rounded-square background: sand-to-sunset gradient -->
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#9fe0ff"/>
+      <stop offset="50%" stop-color="#fff1d6"/>
+      <stop offset="100%" stop-color="#ffd9bd"/>
+    </linearGradient>
+    <!-- Cup gradient: brand cyan to magenta -->
+    <linearGradient id="cupGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#34D7FF"/>
+      <stop offset="100%" stop-color="#FF3D97"/>
+    </linearGradient>
+    <!-- Straw gradient -->
+    <linearGradient id="strawGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFC95C"/>
+      <stop offset="100%" stop-color="#FF8A2B"/>
+    </linearGradient>
+    <clipPath id="roundSquare">
+      <rect x="0" y="0" width="512" height="512" rx="112" ry="112"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect x="0" y="0" width="512" height="512" rx="112" ry="112" fill="url(#bgGrad)"/>
+
+  <!-- Sun (upper right) -->
+  <circle cx="380" cy="130" r="52" fill="#FFC95C" opacity="0.75"/>
+
+  <!-- Wave decorations (ocean, lower portion) -->
+  <path d="M0 370 Q64 345 128 370 Q192 395 256 370 Q320 345 384 370 Q448 395 512 370 L512 512 L0 512 Z"
+        fill="#9fe0ff" opacity="0.45"/>
+  <path d="M0 400 Q80 378 160 400 Q240 422 320 400 Q400 378 480 400 L512 420 L512 512 L0 512 Z"
+        fill="#34D7FF" opacity="0.3"/>
+
+  <!-- Sand strip -->
+  <ellipse cx="256" cy="490" rx="200" ry="30" fill="#FFC95C" opacity="0.55"/>
+
+  <!-- Cup body: tapered, classic to-go cup shape -->
+  <!-- Cup body is a trapezoid: top width 140, bottom width 100, height 170 -->
+  <path d="M186 210 L172 380 L340 380 L326 210 Z" fill="url(#cupGrad)" rx="8"/>
+  <!-- Cup highlight -->
+  <path d="M190 215 L180 340 L210 340 L218 215 Z" fill="white" opacity="0.18"/>
+
+  <!-- Cup lid (slightly wider than top of cup) -->
+  <rect x="178" y="196" width="156" height="20" rx="10" fill="#163a5f" opacity="0.85"/>
+  <!-- Lid dome -->
+  <ellipse cx="256" cy="196" rx="78" ry="10" fill="#163a5f" opacity="0.75"/>
+
+  <!-- Straw -->
+  <rect x="248" y="110" width="18" height="108" rx="9" fill="url(#strawGrad)"/>
+  <!-- Straw bend curve hint -->
+  <path d="M266 148 Q290 138 288 118" stroke="#FFC95C" stroke-width="14" fill="none" stroke-linecap="round"/>
+
+  <!-- Cup sleeve (lower third, for texture/brand) -->
+  <path d="M178 300 L174 360 L338 360 L334 300 Z" fill="#163a5f" opacity="0.18"/>
+
+  <!-- Brand wordmark "TB" on cup -->
+  <text x="256" y="302" font-family="Georgia, serif" font-weight="900" font-size="52"
+        fill="white" opacity="0.85" text-anchor="middle" dominant-baseline="middle"
+        letter-spacing="-2">TB</text>
+</svg>

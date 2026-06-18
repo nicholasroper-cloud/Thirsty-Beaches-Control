@@ -1,0 +1,25 @@
+{
+  "name": "Thirsty Beaches Owner Control",
+  "short_name": "TB Control",
+  "description": "Mark drinks sold-out and set the daily special on the Thirsty Beaches kiosk.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#fff5e6",
+  "background_color": "#fff5e6",
+  "icons": [
+    {
+      "src": "./icon-512.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
