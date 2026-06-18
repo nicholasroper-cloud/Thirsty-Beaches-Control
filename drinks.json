@@ -1,0 +1,376 @@
+{
+ "drinks": [
+  {
+   "id": "beached-whale",
+   "name": "Sandy Bottom",
+   "category": "floats",
+   "categoryLabel": "Floats"
+  },
+  {
+   "id": "swole-patrol",
+   "name": "Thicc & Thirsty",
+   "category": "floats",
+   "categoryLabel": "Floats"
+  },
+  {
+   "id": "cold-front",
+   "name": "Cold Shoulder",
+   "category": "floats",
+   "categoryLabel": "Floats"
+  },
+  {
+   "id": "riptide-float",
+   "name": "Riptide",
+   "category": "floats",
+   "categoryLabel": "Floats"
+  },
+  {
+   "id": "byo-float",
+   "name": "Build Your Own Float",
+   "category": "floats",
+   "categoryLabel": "Floats"
+  },
+  {
+   "id": "thirst-trap",
+   "name": "Thirst Trap",
+   "category": "dirtysodas",
+   "categoryLabel": "Dirty Sodas"
+  },
+  {
+   "id": "dirty-secret",
+   "name": "Dirty Little Secret",
+   "category": "dirtysodas",
+   "categoryLabel": "Dirty Sodas"
+  },
+  {
+   "id": "nice-coconuts",
+   "name": "Nice Coconuts",
+   "category": "dirtysodas",
+   "categoryLabel": "Dirty Sodas"
+  },
+  {
+   "id": "razzle",
+   "name": "Razzle My Berries",
+   "category": "dirtysodas",
+   "categoryLabel": "Dirty Sodas"
+  },
+  {
+   "id": "sweet-cheeks",
+   "name": "Sweet Cheeks",
+   "category": "dirtysodas",
+   "categoryLabel": "Dirty Sodas"
+  },
+  {
+   "id": "upside-down",
+   "name": "Upside-Down & Dirty",
+   "category": "dirtysodas",
+   "categoryLabel": "Dirty Sodas"
+  },
+  {
+   "id": "tropic-hot",
+   "name": "Tropic Like It's Hot",
+   "category": "dirtysodas",
+   "categoryLabel": "Dirty Sodas"
+  },
+  {
+   "id": "sunset-rocks",
+   "name": "Sunset on the Rocks",
+   "category": "dirtysodas",
+   "categoryLabel": "Dirty Sodas"
+  },
+  {
+   "id": "pour-decisions",
+   "name": "Pour Decisions",
+   "category": "dirtysodas",
+   "categoryLabel": "Dirty Sodas"
+  },
+  {
+   "id": "golden-hour",
+   "name": "Golden Hour",
+   "category": "newwaves",
+   "categoryLabel": "New Waves"
+  },
+  {
+   "id": "lazy-river",
+   "name": "Lazy River",
+   "category": "newwaves",
+   "categoryLabel": "New Waves"
+  },
+  {
+   "id": "castaway",
+   "name": "Castaway",
+   "category": "newwaves",
+   "categoryLabel": "New Waves"
+  },
+  {
+   "id": "beach-sting",
+   "name": "Beach Sting",
+   "category": "newwaves",
+   "categoryLabel": "New Waves"
+  },
+  {
+   "id": "riptide",
+   "name": "Wipeout",
+   "category": "newwaves",
+   "categoryLabel": "New Waves"
+  },
+  {
+   "id": "sunburn",
+   "name": "Sunburn",
+   "category": "newwaves",
+   "categoryLabel": "New Waves"
+  },
+  {
+   "id": "pearl-diver",
+   "name": "Pearl Diver",
+   "category": "newwaves",
+   "categoryLabel": "New Waves"
+  },
+  {
+   "id": "beach-buzz",
+   "name": "Beach Buzz",
+   "category": "newwaves",
+   "categoryLabel": "New Waves"
+  },
+  {
+   "id": "spicy-senorita",
+   "name": "Spicy Señorita",
+   "category": "newwaves",
+   "categoryLabel": "New Waves"
+  },
+  {
+   "id": "the-blue-one",
+   "name": "Feelin' Frisky",
+   "category": "newwaves",
+   "categoryLabel": "New Waves"
+  },
+  {
+   "id": "low-tide",
+   "name": "Low Tide",
+   "category": "newwaves",
+   "categoryLabel": "New Waves"
+  },
+  {
+   "id": "adios",
+   "name": "Adios, Beaches",
+   "category": "energy",
+   "categoryLabel": "Energy"
+  },
+  {
+   "id": "wired",
+   "name": "Wired & Tired",
+   "category": "energy",
+   "categoryLabel": "Energy"
+  },
+  {
+   "id": "wet-wild",
+   "name": "Wet & Wild",
+   "category": "energy",
+   "categoryLabel": "Energy"
+  },
+  {
+   "id": "rise-grind",
+   "name": "Rise & Grind",
+   "category": "energy",
+   "categoryLabel": "Energy"
+  },
+  {
+   "id": "skinny",
+   "name": "Skinny Dippin'",
+   "category": "energy",
+   "categoryLabel": "Energy"
+  },
+  {
+   "id": "main-squeeze",
+   "name": "Main Squeeze",
+   "category": "lemonades",
+   "categoryLabel": "Lemonades"
+  },
+  {
+   "id": "pucker",
+   "name": "Kiss & Tell",
+   "category": "lemonades",
+   "categoryLabel": "Lemonades"
+  },
+  {
+   "id": "life-beaches",
+   "name": "When Life Gives You Beaches",
+   "category": "lemonades",
+   "categoryLabel": "Lemonades"
+  },
+  {
+   "id": "easy-squeezy",
+   "name": "Easy, Tiger",
+   "category": "lemonades",
+   "categoryLabel": "Lemonades"
+  },
+  {
+   "id": "dolce",
+   "name": "La Dolce Beach",
+   "category": "italian",
+   "categoryLabel": "Italian Sodas"
+  },
+  {
+   "id": "fizzy",
+   "name": "Fizzy Business",
+   "category": "italian",
+   "categoryLabel": "Italian Sodas"
+  },
+  {
+   "id": "feelin-blue",
+   "name": "Feelin' Blue",
+   "category": "italian",
+   "categoryLabel": "Italian Sodas"
+  },
+  {
+   "id": "pineapple-express",
+   "name": "Pineapple Express",
+   "category": "dolewhip",
+   "categoryLabel": "Soft Serve"
+  },
+  {
+   "id": "vanilla-vibes",
+   "name": "Vanilla Vibes",
+   "category": "dolewhip",
+   "categoryLabel": "Soft Serve"
+  },
+  {
+   "id": "swirl-power",
+   "name": "Swirl Power",
+   "category": "dolewhip",
+   "categoryLabel": "Soft Serve"
+  },
+  {
+   "id": "float-on",
+   "name": "Float On",
+   "category": "dolewhip",
+   "categoryLabel": "Soft Serve"
+  },
+  {
+   "id": "whip-it",
+   "name": "Whip It Good",
+   "category": "dolewhip",
+   "categoryLabel": "Soft Serve"
+  },
+  {
+   "id": "cloud-nine",
+   "name": "Cloud Nine",
+   "category": "coffee",
+   "categoryLabel": "Coffee"
+  },
+  {
+   "id": "salted-caramel-cloud",
+   "name": "Salted Caramel Cloud",
+   "category": "coffee",
+   "categoryLabel": "Coffee"
+  },
+  {
+   "id": "beach-smores",
+   "name": "Beach S'mores",
+   "category": "coffee",
+   "categoryLabel": "Coffee"
+  },
+  {
+   "id": "espresso-yourself",
+   "name": "Espresso Yourself",
+   "category": "coffee",
+   "categoryLabel": "Coffee"
+  },
+  {
+   "id": "basic-beach",
+   "name": "Basic Beach",
+   "category": "coffee",
+   "categoryLabel": "Coffee"
+  },
+  {
+   "id": "cappa",
+   "name": "Cappa-Cabana",
+   "category": "coffee",
+   "categoryLabel": "Coffee"
+  },
+  {
+   "id": "but-first",
+   "name": "But First, Caffeine",
+   "category": "coffee",
+   "categoryLabel": "Coffee"
+  },
+  {
+   "id": "beach-bothered",
+   "name": "Beach & Bothered",
+   "category": "coffee",
+   "categoryLabel": "Coffee"
+  },
+  {
+   "id": "coco-mocha",
+   "name": "Coco Loco Mocha",
+   "category": "coffee",
+   "categoryLabel": "Coffee"
+  },
+  {
+   "id": "wake-shake",
+   "name": "Wake & Shake",
+   "category": "coffee",
+   "categoryLabel": "Coffee"
+  },
+  {
+   "id": "hot-mess",
+   "name": "Hot Mess",
+   "category": "coffee",
+   "categoryLabel": "Coffee"
+  },
+  {
+   "id": "beach-drip",
+   "name": "Beach Drip",
+   "category": "coffee",
+   "categoryLabel": "Coffee"
+  },
+  {
+   "id": "lil-squirt",
+   "name": "Lil' Squirt",
+   "category": "beachbabies",
+   "categoryLabel": "Beach Babies"
+  },
+  {
+   "id": "shore-temple",
+   "name": "Shore Temple",
+   "category": "beachbabies",
+   "categoryLabel": "Beach Babies"
+  },
+  {
+   "id": "sandcastle-shake",
+   "name": "Sandcastle Shake",
+   "category": "beachbabies",
+   "categoryLabel": "Beach Babies"
+  },
+  {
+   "id": "beach-ball",
+   "name": "Beach Ball",
+   "category": "beachbabies",
+   "categoryLabel": "Beach Babies"
+  },
+  {
+   "id": "mermaid-splash",
+   "name": "Mermaid Splash",
+   "category": "beachbabies",
+   "categoryLabel": "Beach Babies"
+  },
+  {
+   "id": "dino-juice",
+   "name": "Dino Juice",
+   "category": "beachbabies",
+   "categoryLabel": "Beach Babies"
+  },
+  {
+   "id": "cotton-candy-cloud",
+   "name": "Cotton Candy Cloud",
+   "category": "beachbabies",
+   "categoryLabel": "Beach Babies"
+  },
+  {
+   "id": "lil-root-beer-float",
+   "name": "Lil' Root Beer Float",
+   "category": "beachbabies",
+   "categoryLabel": "Beach Babies"
+  }
+ ]
+}
