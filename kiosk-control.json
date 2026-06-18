@@ -2,5 +2,6 @@
  "soldOut": [],
  "special": null,
  "updated": "",
- "soldOutOptions": []
+ "soldOutOptions": [],
+ "healthcheckUrl": "https://hc-ping.com/12dd75eb-2c38-45e8-9e3f-6efce01a3f60"
 }
