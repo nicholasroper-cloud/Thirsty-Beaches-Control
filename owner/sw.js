@@ -4,7 +4,7 @@
 // It does NOT intercept GitHub API requests — those always hit the network
 // (write operations must never go through a cache).
 
-const CACHE_NAME = 'tb-control-v1';
+const CACHE_NAME = 'tb-control-v2';
 
 // App shell assets to pre-cache (all relative to /owner/)
 const SHELL_ASSETS = [
