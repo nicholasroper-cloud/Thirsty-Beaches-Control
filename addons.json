@@ -4,484 +4,202 @@
    "label": "Size",
    "key": "size",
    "items": [
-    {
-     "id": "size:Regular",
-     "name": "Regular"
-    },
-    {
-     "id": "size:Large",
-     "name": "Large"
-    },
-    {
-     "id": "size:Small 16oz",
-     "name": "Small 16oz"
-    },
-    {
-     "id": "size:Medium 24oz",
-     "name": "Medium 24oz"
-    },
-    {
-     "id": "size:Large 32oz",
-     "name": "Large 32oz"
-    },
-    {
-     "id": "size:12oz",
-     "name": "12oz"
-    },
-    {
-     "id": "size:16oz",
-     "name": "16oz"
-    },
-    {
-     "id": "size:20oz",
-     "name": "20oz"
-    },
-    {
-     "id": "size:Small",
-     "name": "Small"
-    }
+    { "id": "size:Regular",     "name": "Regular",     "d": 0 },
+    { "id": "size:Large",       "name": "Large",       "d": 1.50 },
+    { "id": "size:Small 16oz",  "name": "Small 16oz",  "d": 0 },
+    { "id": "size:Medium 24oz", "name": "Medium 24oz", "d": 0.80 },
+    { "id": "size:Large 32oz",  "name": "Large 32oz",  "d": 1.50 },
+    { "id": "size:12oz",        "name": "12oz",        "d": 0 },
+    { "id": "size:16oz",        "name": "16oz",        "d": 0.60 },
+    { "id": "size:20oz",        "name": "20oz",        "d": 1.10 },
+    { "id": "size:Small",       "name": "Small",       "d": 0 }
    ]
   },
   {
    "label": "What's underneath",
    "key": "base",
    "items": [
-    {
-     "id": "base:Pineapple soda",
-     "name": "Pineapple soda"
-    },
-    {
-     "id": "base:Orange soda",
-     "name": "Orange soda"
-    },
-    {
-     "id": "base:Root beer",
-     "name": "Root beer"
-    },
-    {
-     "id": "base:Cream soda",
-     "name": "Cream soda"
-    },
-    {
-     "id": "base:Dr Pepper",
-     "name": "Dr Pepper"
-    },
-    {
-     "id": "base:Coconut-lime soda",
-     "name": "Coconut-lime soda"
-    },
-    {
-     "id": "base:Blue raspberry lemonade",
-     "name": "Blue raspberry lemonade"
-    },
-    {
-     "id": "base:Strawberry lemonade",
-     "name": "Strawberry lemonade"
-    },
-    {
-     "id": "base:Cherry limeade",
-     "name": "Cherry limeade"
-    }
+    { "id": "base:Pineapple soda",        "name": "Pineapple soda",        "d": 0 },
+    { "id": "base:Orange soda",           "name": "Orange soda",           "d": 0 },
+    { "id": "base:Root beer",             "name": "Root beer",             "d": 0 },
+    { "id": "base:Cream soda",            "name": "Cream soda",            "d": 0 },
+    { "id": "base:Dr Pepper",             "name": "Dr Pepper",             "d": 0 },
+    { "id": "base:Coconut-lime soda",     "name": "Coconut-lime soda",     "d": 0 },
+    { "id": "base:Blue raspberry lemonade","name": "Blue raspberry lemonade","d": 0 },
+    { "id": "base:Strawberry lemonade",   "name": "Strawberry lemonade",   "d": 0 },
+    { "id": "base:Cherry limeade",        "name": "Cherry limeade",        "d": 0 }
    ]
   },
   {
    "label": "Soft-serve cap",
    "key": "cap",
    "items": [
-    {
-     "id": "cap:Dole Whip",
-     "name": "Dole Whip"
-    },
-    {
-     "id": "cap:Vanilla",
-     "name": "Vanilla"
-    },
-    {
-     "id": "cap:Twist (both)",
-     "name": "Twist (both)"
-    }
+    { "id": "cap:Dole Whip",              "name": "Dole Whip",              "d": 0 },
+    { "id": "cap:Vanilla",                "name": "Vanilla",                "d": 0 },
+    { "id": "cap:Twist (both)",           "name": "Twist (both)",           "d": 0 }
    ]
   },
   {
    "label": "Load it up",
    "key": "boost",
    "items": [
-    {
-     "id": "boost:Protein scoop",
-     "name": "Protein scoop"
-    },
-    {
-     "id": "boost:Popping boba",
-     "name": "Popping boba"
-    },
-    {
-     "id": "boost:Chamoy drizzle",
-     "name": "Chamoy drizzle"
-    },
-    {
-     "id": "boost:Tajín rim",
-     "name": "Tajín rim"
-    },
-    {
-     "id": "boost:Fresh fruit",
-     "name": "Fresh fruit"
-    },
-    {
-     "id": "boost:Toasted coconut",
-     "name": "Toasted coconut"
-    }
+    { "id": "boost:Protein scoop",  "name": "Protein scoop",  "d": 1.50 },
+    { "id": "boost:Popping boba",   "name": "Popping boba",   "d": 0.75 },
+    { "id": "boost:Chamoy drizzle", "name": "Chamoy drizzle", "d": 0.75 },
+    { "id": "boost:Tajín rim",      "name": "Tajín rim",      "d": 0.50 },
+    { "id": "boost:Fresh fruit",    "name": "Fresh fruit",    "d": 0.99 },
+    { "id": "boost:Toasted coconut","name": "Toasted coconut","d": 0.75 }
    ]
   },
   {
    "label": "Top It Off",
    "key": "topper",
    "items": [
-    {
-     "id": "topper:Whipped cream",
-     "name": "Whipped cream"
-    },
-    {
-     "id": "topper:Sweet cream cold foam",
-     "name": "Sweet cream cold foam"
-    },
-    {
-     "id": "topper:Vanilla cold foam",
-     "name": "Vanilla cold foam"
-    },
-    {
-     "id": "topper:Salted caramel cold foam",
-     "name": "Salted caramel cold foam"
-    }
+    { "id": "topper:Whipped cream",            "name": "Whipped cream",            "d": 0.50 },
+    { "id": "topper:Sweet cream cold foam",    "name": "Sweet cream cold foam",    "d": 0.75 },
+    { "id": "topper:Vanilla cold foam",        "name": "Vanilla cold foam",        "d": 0.99 },
+    { "id": "topper:Salted caramel cold foam", "name": "Salted caramel cold foam", "d": 0.99 }
    ]
   },
   {
    "label": "Soda base",
    "key": "base",
    "items": [
-    {
-     "id": "base:Coca-Cola",
-     "name": "Coca-Cola"
-    },
-    {
-     "id": "base:Diet Coke",
-     "name": "Diet Coke"
-    },
-    {
-     "id": "base:Pepsi",
-     "name": "Pepsi"
-    },
-    {
-     "id": "base:Diet Dr Pepper",
-     "name": "Diet Dr Pepper"
-    },
-    {
-     "id": "base:Sprite",
-     "name": "Sprite"
-    },
-    {
-     "id": "base:Sprite Zero",
-     "name": "Sprite Zero"
-    },
-    {
-     "id": "base:Mountain Dew",
-     "name": "Mountain Dew"
-    },
-    {
-     "id": "base:Diet Mtn Dew",
-     "name": "Diet Mtn Dew"
-    },
-    {
-     "id": "base:Root Beer",
-     "name": "Root Beer"
-    },
-    {
-     "id": "base:Cream Soda",
-     "name": "Cream Soda"
-    },
-    {
-     "id": "base:Fanta Orange",
-     "name": "Fanta Orange"
-    },
-    {
-     "id": "base:Big Red",
-     "name": "Big Red"
-    },
-    {
-     "id": "base:Squirt",
-     "name": "Squirt"
-    }
+    { "id": "base:Coca-Cola",      "name": "Coca-Cola",      "d": 0 },
+    { "id": "base:Diet Coke",      "name": "Diet Coke",      "d": 0 },
+    { "id": "base:Pepsi",          "name": "Pepsi",          "d": 0 },
+    { "id": "base:Diet Dr Pepper", "name": "Diet Dr Pepper", "d": 0 },
+    { "id": "base:Sprite",         "name": "Sprite",         "d": 0 },
+    { "id": "base:Sprite Zero",    "name": "Sprite Zero",    "d": 0 },
+    { "id": "base:Mountain Dew",   "name": "Mountain Dew",   "d": 0 },
+    { "id": "base:Diet Mtn Dew",   "name": "Diet Mtn Dew",   "d": 0 },
+    { "id": "base:Root Beer",      "name": "Root Beer",      "d": 0 },
+    { "id": "base:Cream Soda",     "name": "Cream Soda",     "d": 0 },
+    { "id": "base:Fanta Orange",   "name": "Fanta Orange",   "d": 0 },
+    { "id": "base:Big Red",        "name": "Big Red",        "d": 0 },
+    { "id": "base:Squirt",         "name": "Squirt",         "d": 0 }
    ]
   },
   {
    "label": "Flavor syrups",
    "key": "flavor",
    "items": [
-    {
-     "id": "flavor:Coconut",
-     "name": "Coconut"
-    },
-    {
-     "id": "flavor:Vanilla",
-     "name": "Vanilla"
-    },
-    {
-     "id": "flavor:Cherry",
-     "name": "Cherry"
-    },
-    {
-     "id": "flavor:Peach",
-     "name": "Peach"
-    },
-    {
-     "id": "flavor:Raspberry",
-     "name": "Raspberry"
-    },
-    {
-     "id": "flavor:Caramel",
-     "name": "Caramel"
-    },
-    {
-     "id": "flavor:Lime",
-     "name": "Lime"
-    },
-    {
-     "id": "flavor:Blue Raspberry",
-     "name": "Blue Raspberry"
-    },
-    {
-     "id": "flavor:Hazelnut",
-     "name": "Hazelnut"
-    }
+    { "id": "flavor:Coconut",       "name": "Coconut",       "d": 0.50 },
+    { "id": "flavor:Vanilla",       "name": "Vanilla",       "d": 0.50 },
+    { "id": "flavor:Cherry",        "name": "Cherry",        "d": 0.50 },
+    { "id": "flavor:Peach",         "name": "Peach",         "d": 0.50 },
+    { "id": "flavor:Raspberry",     "name": "Raspberry",     "d": 0.50 },
+    { "id": "flavor:Caramel",       "name": "Caramel",       "d": 0.50 },
+    { "id": "flavor:Lime",          "name": "Lime",          "d": 0.50 },
+    { "id": "flavor:Blue Raspberry","name": "Blue Raspberry","d": 0.50 },
+    { "id": "flavor:Hazelnut",      "name": "Hazelnut",      "d": 0.50 }
    ]
   },
   {
    "label": "Fruit puree",
    "key": "puree",
    "items": [
-    {
-     "id": "puree:Strawberry",
-     "name": "Strawberry"
-    },
-    {
-     "id": "puree:Mango",
-     "name": "Mango"
-    },
-    {
-     "id": "puree:Pineapple",
-     "name": "Pineapple"
-    },
-    {
-     "id": "puree:Peach",
-     "name": "Peach"
-    },
-    {
-     "id": "puree:Raspberry",
-     "name": "Raspberry"
-    }
+    { "id": "puree:Strawberry", "name": "Strawberry", "d": 0.99 },
+    { "id": "puree:Mango",      "name": "Mango",      "d": 0.99 },
+    { "id": "puree:Pineapple",  "name": "Pineapple",  "d": 0.99 },
+    { "id": "puree:Peach",      "name": "Peach",      "d": 0.99 },
+    { "id": "puree:Raspberry",  "name": "Raspberry",  "d": 0.99 }
    ]
   },
   {
    "label": "Cream",
    "key": "cream",
    "items": [
-    {
-     "id": "cream:None",
-     "name": "None"
-    },
-    {
-     "id": "cream:Vanilla Sweet Cream",
-     "name": "Vanilla Sweet Cream"
-    },
-    {
-     "id": "cream:Coconut Cream",
-     "name": "Coconut Cream"
-    }
+    { "id": "cream:None",               "name": "None",               "d": 0 },
+    { "id": "cream:Vanilla Sweet Cream","name": "Vanilla Sweet Cream","d": 0.60 },
+    { "id": "cream:Coconut Cream",      "name": "Coconut Cream",      "d": 0.60 }
    ]
   },
   {
    "label": "Make it",
    "key": "style",
    "items": [
-    {
-     "id": "style:Over ice",
-     "name": "Over ice"
-    },
-    {
-     "id": "style:Blended / frozen",
-     "name": "Blended / frozen"
-    }
+    { "id": "style:Over ice",         "name": "Over ice",         "d": 0 },
+    { "id": "style:Blended / frozen", "name": "Blended / frozen", "d": 1.00 }
    ]
   },
   {
    "label": "Extras",
    "key": "extra",
    "items": [
-    {
-     "id": "extra:Fresh lime",
-     "name": "Fresh lime"
-    },
-    {
-     "id": "extra:Popping boba",
-     "name": "Popping boba"
-    },
-    {
-     "id": "extra:Extra pump",
-     "name": "Extra pump"
-    },
-    {
-     "id": "extra:Extra shot",
-     "name": "Extra shot"
-    },
-    {
-     "id": "extra:Decaf",
-     "name": "Decaf"
-    }
+    { "id": "extra:Fresh lime",   "name": "Fresh lime",   "d": 0.25 },
+    { "id": "extra:Popping boba", "name": "Popping boba", "d": 0.75 },
+    { "id": "extra:Extra pump",   "name": "Extra pump",   "d": 0.40 },
+    { "id": "extra:Extra shot",   "name": "Extra shot",   "d": 1.00 },
+    { "id": "extra:Decaf",        "name": "Decaf",        "d": 0 }
    ]
   },
   {
    "label": "Energy drink",
    "key": "base",
    "items": [
-    {
-     "id": "base:Red Bull",
-     "name": "Red Bull"
-    },
-    {
-     "id": "base:Sugar-Free Red Bull",
-     "name": "Sugar-Free Red Bull"
-    },
-    {
-     "id": "base:Alani Nu",
-     "name": "Alani Nu"
-    },
-    {
-     "id": "base:Monster",
-     "name": "Monster"
-    }
+    { "id": "base:Red Bull",           "name": "Red Bull",           "d": 0 },
+    { "id": "base:Sugar-Free Red Bull","name": "Sugar-Free Red Bull","d": 0 },
+    { "id": "base:Alani Nu",           "name": "Alani Nu",           "d": 0 },
+    { "id": "base:Monster",            "name": "Monster",            "d": 0 }
    ]
   },
   {
    "label": "Lemonade base",
    "key": "base",
    "items": [
-    {
-     "id": "base:Classic Lemonade",
-     "name": "Classic Lemonade"
-    },
-    {
-     "id": "base:Pink Lemonade",
-     "name": "Pink Lemonade"
-    },
-    {
-     "id": "base:Strawberry Lemonade",
-     "name": "Strawberry Lemonade"
-    },
-    {
-     "id": "base:Limeade",
-     "name": "Limeade"
-    },
-    {
-     "id": "base:Cherry Limeade",
-     "name": "Cherry Limeade"
-    },
-    {
-     "id": "base:Arnold Palmer (½ tea)",
-     "name": "Arnold Palmer (½ tea)"
-    }
+    { "id": "base:Classic Lemonade",        "name": "Classic Lemonade",        "d": 0 },
+    { "id": "base:Pink Lemonade",           "name": "Pink Lemonade",           "d": 0 },
+    { "id": "base:Strawberry Lemonade",     "name": "Strawberry Lemonade",     "d": 0 },
+    { "id": "base:Limeade",                 "name": "Limeade",                 "d": 0 },
+    { "id": "base:Cherry Limeade",          "name": "Cherry Limeade",          "d": 0 },
+    { "id": "base:Arnold Palmer (½ tea)",   "name": "Arnold Palmer (½ tea)",   "d": 0 }
    ]
   },
   {
    "label": "Flavor",
    "key": "flavor",
    "items": [
-    {
-     "id": "flavor:Dole Whip",
-     "name": "Dole Whip"
-    },
-    {
-     "id": "flavor:Twist (Dole Whip + Vanilla)",
-     "name": "Twist (Dole Whip + Vanilla)"
-    }
+    { "id": "flavor:Dole Whip",                    "name": "Dole Whip",                    "d": 0 },
+    { "id": "flavor:Twist (Dole Whip + Vanilla)",  "name": "Twist (Dole Whip + Vanilla)",  "d": 0 }
    ]
   },
   {
    "label": "Serve it as",
    "key": "serve",
    "items": [
-    {
-     "id": "serve:Cup",
-     "name": "Cup"
-    },
-    {
-     "id": "serve:Waffle cone",
-     "name": "Waffle cone"
-    },
-    {
-     "id": "serve:Float (in juice/soda)",
-     "name": "Float (in juice/soda)"
-    }
+    { "id": "serve:Cup",                "name": "Cup",                "d": 0 },
+    { "id": "serve:Waffle cone",        "name": "Waffle cone",        "d": 0.75 },
+    { "id": "serve:Float (in juice/soda)","name": "Float (in juice/soda)","d": 1.50 }
    ]
   },
   {
    "label": "Toppings",
    "key": "top",
    "items": [
-    {
-     "id": "top:Toasted coconut",
-     "name": "Toasted coconut"
-    },
-    {
-     "id": "top:Pineapple chunks",
-     "name": "Pineapple chunks"
-    },
-    {
-     "id": "top:Rainbow sprinkles",
-     "name": "Rainbow sprinkles"
-    },
-    {
-     "id": "top:Tajín",
-     "name": "Tajín"
-    },
-    {
-     "id": "top:Popping boba",
-     "name": "Popping boba"
-    }
+    { "id": "top:Toasted coconut",   "name": "Toasted coconut",   "d": 0.75 },
+    { "id": "top:Pineapple chunks",  "name": "Pineapple chunks",  "d": 0.75 },
+    { "id": "top:Rainbow sprinkles", "name": "Rainbow sprinkles", "d": 0.50 },
+    { "id": "top:Tajín",             "name": "Tajín",             "d": 0.50 },
+    { "id": "top:Popping boba",      "name": "Popping boba",      "d": 0.75 }
    ]
   },
   {
    "label": "Hot or iced",
    "key": "temp",
    "items": [
-    {
-     "id": "temp:Hot",
-     "name": "Hot"
-    },
-    {
-     "id": "temp:Iced",
-     "name": "Iced"
-    }
+    { "id": "temp:Hot",  "name": "Hot",  "d": 0 },
+    { "id": "temp:Iced", "name": "Iced", "d": 0 }
    ]
   },
   {
    "label": "Milk",
    "key": "milk",
    "items": [
-    {
-     "id": "milk:Whole",
-     "name": "Whole"
-    },
-    {
-     "id": "milk:2%",
-     "name": "2%"
-    },
-    {
-     "id": "milk:Oat",
-     "name": "Oat"
-    },
-    {
-     "id": "milk:Almond",
-     "name": "Almond"
-    }
+    { "id": "milk:Whole",  "name": "Whole",  "d": 0 },
+    { "id": "milk:2%",     "name": "2%",     "d": 0 },
+    { "id": "milk:Oat",    "name": "Oat",    "d": 0.75 },
+    { "id": "milk:Almond", "name": "Almond", "d": 0.75 }
    ]
   }
  ]

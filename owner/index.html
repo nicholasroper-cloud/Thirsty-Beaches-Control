@@ -918,6 +918,306 @@
     .save-status-msg.failed  { color: var(--red-offline); }
 
     /* ============================================================
+       DRINK LAB TAB
+       ============================================================ */
+    .lab-header {
+      margin-bottom: 20px;
+    }
+    .lab-header h2 {
+      font-family: var(--font-head);
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--ink);
+    }
+    .lab-header p {
+      font-size: 13px;
+      color: var(--ink-soft);
+      margin-top: 2px;
+    }
+
+    .lab-card {
+      background: var(--panel-solid);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 20px;
+      margin-bottom: 14px;
+    }
+    .lab-card-title {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      margin-bottom: 12px;
+    }
+
+    /* No-key placeholder */
+    .lab-no-key {
+      text-align: center;
+      padding: 32px 20px;
+      color: var(--ink-soft);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    .lab-no-key a {
+      color: var(--ink);
+      font-weight: 800;
+      text-decoration: underline;
+    }
+
+    /* Brief input */
+    .lab-brief-wrap {
+      position: relative;
+    }
+    .lab-brief {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: var(--radius-card);
+      border: 1.5px solid var(--border-strong);
+      background: var(--bg-sand);
+      color: var(--ink);
+      font-size: 15px;
+      font-family: var(--font-ui);
+      font-weight: 600;
+      outline: none;
+      resize: none;
+      line-height: 1.5;
+      transition: border-color 0.15s;
+      min-height: 80px;
+    }
+    .lab-brief:focus { border-color: var(--cyan); }
+    .lab-brief::placeholder { color: var(--ink-soft); }
+
+    .lab-brief-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .btn-lab-generate {
+      flex: 1;
+      padding: 14px;
+      border-radius: var(--radius-pill);
+      background: var(--grad-brand);
+      color: white;
+      font-size: 15px;
+      font-weight: 800;
+      text-align: center;
+      box-shadow: 0 4px 14px rgba(255,61,151,0.22);
+      transition: transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-lab-generate:active { transform: scale(0.96); }
+    .btn-lab-generate:disabled { opacity: 0.4; pointer-events: none; }
+
+    /* Generating spinner */
+    .lab-spinner {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 24px 0 8px;
+      color: var(--ink-soft);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .lab-spinner.visible { display: flex; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner-ring {
+      width: 20px; height: 20px;
+      border: 2.5px solid var(--border);
+      border-top-color: var(--magenta);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    /* Generated drink preview */
+    .lab-result {
+      display: none;
+    }
+    .lab-result.visible { display: block; }
+
+    .lab-drink-preview {
+      background: linear-gradient(135deg, rgba(52,215,255,0.10), rgba(255,61,151,0.09));
+      border: 1.5px solid rgba(52,215,255,0.28);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .lab-drink-tag {
+      display: inline-block;
+      background: var(--grad-brand);
+      color: white;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border-radius: var(--radius-pill);
+      padding: 3px 10px;
+      margin-bottom: 8px;
+    }
+    .lab-drink-name-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+    .lab-drink-name {
+      font-family: var(--font-head);
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--ink);
+      line-height: 1.1;
+    }
+    .lab-drink-price {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--price-pink);
+      line-height: 1;
+    }
+    .lab-drink-blurb {
+      font-size: 13px;
+      color: var(--ink-soft);
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+    .lab-drink-recipe {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .lab-mod-chip {
+      display: inline-block;
+      background: var(--bg-sand-deep);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    /* Name edit */
+    .lab-name-edit-group {
+      margin-bottom: 14px;
+    }
+    .lab-name-edit-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      margin-bottom: 5px;
+    }
+    .lab-name-edit-input {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: var(--radius-card);
+      border: 1.5px solid var(--border-strong);
+      background: var(--bg-sand);
+      color: var(--ink);
+      font-size: 15px;
+      font-weight: 700;
+      font-family: var(--font-ui);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .lab-name-edit-input:focus { border-color: var(--cyan); }
+
+    .lab-result-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-lab-regen {
+      padding: 13px 18px;
+      border-radius: var(--radius-pill);
+      border: 1.5px solid var(--border-strong);
+      background: var(--panel-solid);
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 700;
+      transition: transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-lab-regen:active { transform: scale(0.96); }
+
+    .btn-lab-publish {
+      flex: 1;
+      padding: 13px;
+      border-radius: var(--radius-pill);
+      background: var(--grad-brand);
+      color: white;
+      font-size: 14px;
+      font-weight: 800;
+      text-align: center;
+      box-shadow: 0 4px 14px rgba(255,61,151,0.22);
+      transition: transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-lab-publish:active { transform: scale(0.96); }
+    .btn-lab-publish:disabled { opacity: 0.4; pointer-events: none; }
+
+    .lab-save-msg {
+      font-size: 12px;
+      font-weight: 700;
+      min-height: 18px;
+      margin-top: 8px;
+      text-align: center;
+    }
+    .lab-save-msg.saving  { color: var(--coral); }
+    .lab-save-msg.saved   { color: var(--green-live); }
+    .lab-save-msg.failed  { color: var(--red-offline); }
+    .lab-error-msg {
+      font-size: 13px;
+      color: var(--red-offline);
+      font-weight: 700;
+      margin-top: 10px;
+      text-align: center;
+      min-height: 18px;
+    }
+
+    /* Current specials summary in Lab */
+    .lab-specials-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .lab-special-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-sand);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+    }
+    .lab-special-row-name {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .lab-special-row-price {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--price-pink);
+    }
+    .btn-lab-clear-sp {
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      border: 1.5px solid rgba(196,43,72,0.28);
+      background: rgba(196,43,72,0.06);
+      color: var(--red-offline);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.1s;
+    }
+    .btn-lab-clear-sp:active { transform: scale(0.96); }
+
+    /* ============================================================
        LOCK / SETTINGS TAB
        ============================================================ */
     .lock-card {
@@ -1507,6 +1807,85 @@
 
 
       <!-- ======================================================
+           TAB: DRINK LAB
+           ====================================================== -->
+      <div id="tab-lab" class="tab-page" role="main" aria-label="Drink Lab">
+        <div class="lab-header">
+          <h2>Drink Lab</h2>
+          <p>Describe a special — AI invents the recipe</p>
+        </div>
+
+        <!-- No-key placeholder (shown when Anthropic key not set) -->
+        <div id="lab-no-key" class="lab-card" style="display:none;">
+          <div class="lab-no-key">
+            Add your Anthropic API key in Settings to use the Drink Lab.<br><br>
+            Set a spend limit at <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> before pasting the key.
+          </div>
+        </div>
+
+        <!-- Brief input (shown when key is set) -->
+        <div id="lab-input-section" class="lab-card">
+          <div class="lab-card-title">Brief</div>
+          <textarea class="lab-brief" id="lab-brief-input"
+                    maxlength="140"
+                    placeholder="e.g. a fall coffee special with caramel, a blue kids drink, use up our mango…"
+                    rows="3"
+                    autocomplete="off" autocorrect="off" spellcheck="false"
+                    aria-label="Drink brief"></textarea>
+          <div class="char-count" id="lab-brief-count">0 / 140</div>
+          <div class="lab-brief-actions">
+            <button class="btn-lab-generate" id="btn-lab-generate" disabled>Generate Drink</button>
+          </div>
+          <div class="lab-spinner" id="lab-spinner" aria-live="polite" aria-label="Generating drink">
+            <div class="spinner-ring" aria-hidden="true"></div>
+            Asking the Drink Lab…
+          </div>
+          <div class="lab-error-msg" id="lab-error" role="alert" aria-live="assertive"></div>
+        </div>
+
+        <!-- Generated result -->
+        <div class="lab-result" id="lab-result">
+          <div class="lab-card">
+            <div class="lab-card-title">Invented Drink</div>
+
+            <div class="lab-drink-preview" id="lab-drink-preview">
+              <div class="lab-drink-tag">Drink Lab</div>
+              <div class="lab-drink-name-row">
+                <span class="lab-drink-name" id="lab-preview-name"></span>
+                <span class="lab-drink-price" id="lab-preview-price"></span>
+              </div>
+              <div class="lab-drink-blurb" id="lab-preview-blurb"></div>
+              <div class="lab-drink-recipe" id="lab-preview-recipe"></div>
+            </div>
+
+            <div class="lab-name-edit-group">
+              <label class="lab-name-edit-label" for="lab-name-edit">Edit name</label>
+              <input class="lab-name-edit-input" type="text"
+                     id="lab-name-edit"
+                     maxlength="28"
+                     autocomplete="off" autocorrect="off" spellcheck="false"
+                     aria-label="Edit drink name">
+              <div class="char-count" id="lab-name-count">0 / 28</div>
+            </div>
+
+            <div class="lab-result-actions">
+              <button class="btn-lab-regen" id="btn-lab-regen">Regenerate</button>
+              <button class="btn-lab-publish" id="btn-lab-publish">Publish as Today's Special</button>
+            </div>
+            <p class="lab-save-msg" id="lab-save-msg" role="status" aria-live="polite"></p>
+          </div>
+        </div>
+
+        <!-- Current specials on kiosk -->
+        <div class="lab-card" id="lab-specials-card" style="display:none;">
+          <div class="lab-card-title">Live on Kiosk</div>
+          <div class="lab-specials-list" id="lab-specials-list"></div>
+        </div>
+
+      </div><!-- /#tab-lab -->
+
+
+      <!-- ======================================================
            TAB: LOCK / SETTINGS
            ====================================================== -->
       <div id="tab-lock" class="tab-page" role="main" aria-label="Settings and lock">
@@ -1541,9 +1920,28 @@
         </div>
 
         <div class="lock-card">
+          <div class="lock-card-title">Anthropic API Key</div>
+          <div class="lock-card-desc">
+            Required for the Drink Lab. Encrypted on this device with your PIN, never transmitted except directly to Anthropic.
+            Set a spend limit at <strong>console.anthropic.com</strong> before saving.
+          </div>
+          <div class="settings-field-group">
+            <label class="settings-label" for="anthropic-key-input">Anthropic API Key</label>
+            <input class="settings-input" type="password" id="anthropic-key-input"
+                   placeholder="sk-ant-…"
+                   autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                   aria-label="Anthropic API key">
+            <div class="settings-save-msg" id="anthropic-key-save-msg"></div>
+          </div>
+          <button class="btn-secondary" id="btn-save-anthropic-key" style="margin-top:4px;">
+            Save Key
+          </button>
+        </div>
+
+        <div class="lock-card">
           <div class="lock-card-title">Forget Token &amp; Wipe</div>
           <div class="lock-card-desc">
-            Removes your encrypted token and PIN from this device. You will need to re-enter them on next open. This does NOT revoke the GitHub token.
+            Removes your encrypted token, Anthropic key, and PIN from this device. You will need to re-enter them on next open. This does NOT revoke the GitHub token.
           </div>
           <button class="btn-danger" id="btn-wipe">Wipe All Credentials</button>
         </div>
@@ -1583,6 +1981,17 @@
           <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26 12,2"/>
         </svg>
         Special
+      </button>
+
+      <button class="tab-btn" id="tab-btn-lab" role="tab"
+              aria-selected="false" aria-controls="tab-lab"
+              onclick="switchTab('lab')">
+        <!-- beaker / flask icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" aria-hidden="true">
+          <path d="M9 3h6M9 3v7l-5 9a1 1 0 00.9 1.5h14.2A1 1 0 0020 19l-5-9V3"/>
+          <line x1="6" y1="14" x2="18" y2="14"/>
+        </svg>
+        Drink Lab
       </button>
 
       <button class="tab-btn" id="tab-btn-lock" role="tab"
@@ -1833,6 +2242,10 @@ async function unlockSession(pin) {
   const token = await decryptToken(pin, stored);
   // store plaintext in sessionStorage only — cleared on page close
   sessionStorage.setItem(SS_TOKEN, token);
+  // Cache PIN in memory so Settings can re-encrypt the Anthropic key
+  state.sessionPin = pin;
+  // Also load Anthropic key if stored — ignore failure (key may not be set yet)
+  await loadAnthropicKey(pin).catch(() => {});
 }
 
 /** Get session token. Never returns null silently — throws if missing. */
@@ -1842,9 +2255,11 @@ function getSessionToken() {
   return t;
 }
 
-/** Lock: clear session token, reset UI to PIN screen. */
+/** Lock: clear session token + Anthropic key, reset UI to PIN screen. */
 function lockApp() {
   sessionStorage.removeItem(SS_TOKEN);
+  clearAnthropicSession();
+  state.sessionPin = null;
   clearInactivityTimer();
   showScreen('pin');
   state.currentPin = '';
@@ -1860,11 +2275,13 @@ function lockApp() {
 /** Wipe all stored credentials (forget everything). */
 function wipeCredentials() {
   localStorage.removeItem(LS_CREDS);
+  localStorage.removeItem(LS_ANTH_CREDS);
   sessionStorage.removeItem(SS_TOKEN);
+  clearAnthropicSession();
   clearInactivityTimer();
   showScreen('pin');
   state = { ...state, currentPin: '', inSetupFlow: true, setupStep: 'token',
-            pinAttempts: 0, lockedUntil: 0 };
+            pinAttempts: 0, lockedUntil: 0, sessionPin: null };
   initPinScreen();
 }
 
@@ -2001,6 +2418,7 @@ async function handleSetupPinDigit(digit) {
           $('setup-token').value = '';
           // Unlock session with the new PIN
           sessionStorage.setItem(SS_TOKEN, token);
+          state.sessionPin = state.currentPin;
           enterApp();
         } catch (err) {
           $('pin-error').textContent = 'Setup failed — try again';
@@ -2110,7 +2528,7 @@ function showScreen(name) {
 
 function switchTab(name) {
   state.activeTab = name;
-  ['home','soldout','special','lock'].forEach(t => {
+  ['home','soldout','special','lab','lock'].forEach(t => {
     $(`tab-${t}`).classList.toggle('active', t === name);
     const btn = $(`tab-btn-${t}`);
     btn.classList.toggle('active', t === name);
@@ -2120,11 +2538,16 @@ function switchTab(name) {
   // Scroll tab content to top
   $('app-content').scrollTop = 0;
 
-  // If switching to lock tab, do NOT auto-lock — user is looking at settings
   // Reload sold-out list fresh when switching to that tab
   if (name === 'soldout' && state.control) {
     if (state.soldOutSeg === 'addons' && state.addons.length > 0) renderAddonList();
     else if (state.drinks.length > 0) renderDrinkList();
+  }
+
+  // Refresh lab key gate and live specials when entering Drink Lab
+  if (name === 'lab') {
+    labRefreshKeyGate();
+    renderLabSpecials();
   }
 }
 
@@ -2141,11 +2564,16 @@ function enterApp() {
 
 async function loadAll() {
   await Promise.all([loadDrinks(), loadAddons(), loadControl()]);
+  labBuildPaletteFromState(); // build palette index once addons loaded
   syncSpecialFormFromState();
   renderHomeQuickCards();
   if (state.activeTab === 'soldout') {
     if (state.soldOutSeg === 'addons') renderAddonList();
     else renderDrinkList();
+  }
+  if (state.activeTab === 'lab') {
+    labRefreshKeyGate();
+    renderLabSpecials();
   }
   updateHealthBanner();
   startHealthPolling();
@@ -2187,14 +2615,23 @@ async function loadAddons() {
     const res = await fetch(`${RAW_BASE}/addons.json?t=${Date.now()}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    // Flatten groups into a list; preserve groupLabel for section headers
+    // Flatten groups into a list; preserve groupLabel and price delta
     const flat = [];
     for (const group of (data.groups || [])) {
       for (const item of (group.items || [])) {
-        flat.push({ id: item.id, name: item.name, groupLabel: group.label, groupKey: group.key });
+        flat.push({
+          id: item.id,
+          name: item.name,
+          groupLabel: group.label,
+          groupKey: group.key,
+          d: typeof item.d === 'number' ? item.d : 0,
+        });
       }
     }
     state.addons = flat;
+    // Rebuild lab palette if already booted
+    LAB_PALETTE_IDS = null;
+    LAB_ADDON_MAP   = null;
   } catch (err) {
     $('addon-list-container').innerHTML =
       `<div class="empty-state"><p>Could not load add-ons: ${escHtml(err.message)}</p></div>`;
@@ -2381,9 +2818,16 @@ function renderHomeQuickCards() {
   const totalCount  = drinkCount + addonCount;
   $('qc-soldout-count').textContent = totalCount === 0 ? 'None' : totalCount;
 
-  // Special
+  // Special (prefer specials[] array; fall back to legacy special field)
+  const specials = Array.isArray(state.control.specials) ? state.control.specials : [];
   const sp = state.control.special;
-  $('qc-special-val').textContent = sp ? truncate(sp.title || sp.drinkId, 10) : 'None';
+  if (specials.length) {
+    $('qc-special-val').textContent = specials.length === 1
+      ? truncate(specials[0].name, 10)
+      : `${specials.length} live`;
+  } else {
+    $('qc-special-val').textContent = sp ? truncate(sp.title || sp.drinkId, 10) : 'None';
+  }
 
   updateLastSync();
 }
@@ -3042,13 +3486,532 @@ $('modal-overlay').addEventListener('click', e => {
 });
 
 // ----------------------------------------------------------------
+// ANTHROPIC KEY — encrypted storage (same PBKDF2/AES-GCM as GitHub token)
+// ----------------------------------------------------------------
+
+const LS_ANTH_CREDS = 'tb_anth_v1';   // encrypted Anthropic key store
+const SS_ANTH_KEY   = 'tb_anth_session'; // plaintext in sessionStorage only
+
+/**
+ * Encrypt and store the Anthropic key with the session PIN.
+ * We don't have the raw PIN at save-time; re-use the same PBKDF2 approach
+ * by deriving a fresh salt/IV each time. The PIN required is the one already
+ * in use for this session — we re-derive it from the stored GitHub token blob
+ * to avoid asking the owner to re-enter their PIN. Instead we accept that we
+ * need the PIN to save a new key. To keep UX simple: store with a known PIN
+ * that we prompt for inline.
+ *
+ * Simpler path: re-use the same encrypted-blob pattern, but derive from a
+ * static "app-level" passphrase that is not the PIN (less secure but pragmatic
+ * for a second secret on the same device). HOWEVER — Scarlett's requirement is
+ * that the PIN protects all secrets. So we store the Anthropic key encrypted
+ * with the session PIN.
+ *
+ * Implementation: at save time we need the PIN. We ask for it once if not
+ * cached in state. We cache it in state.sessionPin (memory only, cleared on
+ * lock) alongside the session token.
+ */
+
+/** Save plaintext Anthropic key encrypted with the given PIN. */
+async function storeAnthropicKey(pin, apiKey) {
+  const encrypted = await encryptToken(pin, apiKey);
+  localStorage.setItem(LS_ANTH_CREDS, JSON.stringify(encrypted));
+}
+
+/** Load Anthropic key into sessionStorage using the given PIN. Returns true on success. */
+async function loadAnthropicKey(pin) {
+  const raw = localStorage.getItem(LS_ANTH_CREDS);
+  if (!raw) return false;
+  try {
+    const key = await decryptToken(pin, JSON.parse(raw));
+    sessionStorage.setItem(SS_ANTH_KEY, key);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+/** Get Anthropic key from session (null if not loaded). */
+function getAnthropicKey() {
+  return sessionStorage.getItem(SS_ANTH_KEY) || null;
+}
+
+function hasStoredAnthropicKey() {
+  return !!localStorage.getItem(LS_ANTH_CREDS);
+}
+
+/** Clear Anthropic key from session (called on lock). */
+function clearAnthropicSession() {
+  sessionStorage.removeItem(SS_ANTH_KEY);
+}
+
+// ----------------------------------------------------------------
+// DRINK LAB — state
+// ----------------------------------------------------------------
+
+// Palette loaded from addons.json on first Lab visit
+let LAB_PALETTE_IDS = null;  // Set of all valid ids
+let LAB_ADDON_MAP   = null;  // Map id -> {name, d}
+
+// Base-item prices per catKey (cheapest/BYO item per category)
+// Derived from THIRSTY_MENU knowledge, mirroring kiosk linePrice logic.
+const CAT_BASE_PRICES = {
+  floats:      5.95,  // byo-float
+  dirtysodas:  3.49,  // pour-decisions
+  newwaves:    3.99,
+  energy:      4.99,
+  lemonades:   3.99,
+  italian:     3.49,
+  dolewhip:    5.00,
+  coffee:      2.95,  // beach-drip (cheapest)
+  beachbabies: 2.99,
+};
+
+// Base item ids per catKey (for the specials schema baseItemId field)
+const CAT_BASE_ITEM_IDS = {
+  floats:      'byo-float',
+  dirtysodas:  'pour-decisions',
+  newwaves:    'golden-hour',
+  energy:      'adios',
+  lemonades:   'main-squeeze',
+  italian:     'dolce',
+  dolewhip:    'vanilla-vibes',
+  coffee:      'beach-drip',
+  beachbabies: 'lil-squirt',
+};
+
+const CAT_KEYS = ['floats','dirtysodas','newwaves','energy','lemonades','italian','dolewhip','coffee','beachbabies'];
+const LAB_MODEL = 'claude-haiku-4-5';
+const ANTH_VERSION = '2023-06-01';
+
+// Currently generated drink (pending publish)
+let labDrink = null;
+
+// ----------------------------------------------------------------
+// DRINK LAB — palette loader
+// ----------------------------------------------------------------
+
+/**
+ * Build a flat id->delta map and a Set of valid ids from state.addons.
+ * state.addons is already loaded by loadAddons() during enterApp().
+ */
+function labBuildPaletteFromState() {
+  if (LAB_PALETTE_IDS) return; // already built
+  if (!state.addons.length) return;
+  LAB_PALETTE_IDS = new Set();
+  LAB_ADDON_MAP = new Map();
+  for (const a of state.addons) {
+    LAB_PALETTE_IDS.add(a.id);
+    LAB_ADDON_MAP.set(a.id, { name: a.name, d: typeof a.d === 'number' ? a.d : 0 });
+  }
+}
+
+/**
+ * Build the json_schema enum arrays for Claude's structured output.
+ * All base ids (groupKey === 'base') go into baseEnum; all ids go into modEnum.
+ */
+function labBuildSchema() {
+  labBuildPaletteFromState();
+  const allIds = [...(LAB_PALETTE_IDS || [])];
+  const baseIds = allIds.filter(id => id.startsWith('base:'));
+  return {
+    type: 'object',
+    properties: {
+      catKey: { type: 'string', enum: CAT_KEYS },
+      base:   { oneOf: [{ type: 'string', enum: baseIds }, { type: 'null' }] },
+      mods:   { type: 'array', items: { type: 'string', enum: allIds }, maxItems: 8 },
+      name:   { type: 'string', maxLength: 40 },
+      blurb:  { type: 'string', maxLength: 160 },
+    },
+    required: ['catKey', 'mods', 'name', 'blurb'],
+    additionalProperties: false,
+  };
+}
+
+// ----------------------------------------------------------------
+// DRINK LAB — client-side moderation denylist (mirrors server moderation.js)
+// ----------------------------------------------------------------
+
+const LAB_DENY_PATTERNS = [
+  /\bf+u+c+k/i, /\bs+h+i+t/i, /\bb+i+t+c+h/i, /\basshole/i,
+  /\bcunt\b/i, /\bsex(y|ual)?\b/i, /\bnaked\b/i, /\bporn/i,
+  /\bslut\b/i, /\bwhore\b/i,
+  // health/wellness claims
+  /\bimmun(e|ity)\b/i, /\bdetox\b/i, /\bheals?\b/i, /\bcures?\b/i,
+  /\bgluten.?free\b/i, /\bketo\b/i, /\bsugar.?free\b/i,
+];
+
+/** Returns cleaned string, or '' if denied. */
+function labModerate(text) {
+  if (typeof text !== 'string') return '';
+  const t = text.trim().replace(/\s+/g, ' ');
+  for (const pat of LAB_DENY_PATTERNS) {
+    if (pat.test(t)) return '';
+  }
+  return t;
+}
+
+// ----------------------------------------------------------------
+// DRINK LAB — validate Claude's response client-side
+// ----------------------------------------------------------------
+
+function labValidate(ai) {
+  if (!ai || typeof ai !== 'object') return null;
+
+  // 1. catKey
+  const catKey = CAT_KEYS.includes(ai.catKey) ? ai.catKey : 'dirtysodas';
+
+  // 2. base — must be a valid id starting with 'base:', or null
+  let base = null;
+  if (typeof ai.base === 'string' && ai.base.startsWith('base:') && LAB_PALETTE_IDS && LAB_PALETTE_IDS.has(ai.base)) {
+    base = ai.base;
+  }
+
+  // 3. mods — valid ids only, dedupe, cap 8
+  const mods = [];
+  const seenSingle = new Set();
+  // Single-select group keys (must not repeat in mods)
+  const SINGLE_SELECT = new Set(['size','base','cream','style','temp','milk','serve','cap']);
+  for (const id of (Array.isArray(ai.mods) ? ai.mods : [])) {
+    if (!LAB_PALETTE_IDS || !LAB_PALETTE_IDS.has(id)) continue;
+    const colonIdx = id.indexOf(':');
+    if (colonIdx < 0) continue;
+    const gk = id.slice(0, colonIdx);
+    if (SINGLE_SELECT.has(gk)) {
+      if (seenSingle.has(gk)) continue;
+      seenSingle.add(gk);
+    }
+    if (!mods.includes(id)) mods.push(id);
+    if (mods.length >= 8) break;
+  }
+
+  // 4. name + blurb through denylist
+  let name  = labModerate(String(ai.name  || '').slice(0, 28));
+  let blurb = labModerate(String(ai.blurb || '').slice(0, 120));
+  if (!name) name = 'Beach Special';
+
+  // 5. Require at least some selections
+  if (!mods.length && !base) return null;
+
+  return { catKey, base, mods, name, blurb };
+}
+
+// ----------------------------------------------------------------
+// DRINK LAB — pricing (mirrors kiosk linePrice, server-side in spec)
+// ----------------------------------------------------------------
+
+/**
+ * Compute price for a validated drink.
+ * basePrice = CAT_BASE_PRICES[catKey]
+ * + sum of d values for each mod/base id from LAB_ADDON_MAP
+ */
+function labComputePrice(catKey, base, mods) {
+  labBuildPaletteFromState();
+  let price = CAT_BASE_PRICES[catKey] || 3.49;
+  if (base && LAB_ADDON_MAP) {
+    const entry = LAB_ADDON_MAP.get(base);
+    if (entry) price += entry.d;
+  }
+  for (const id of (mods || [])) {
+    if (!LAB_ADDON_MAP) break;
+    const entry = LAB_ADDON_MAP.get(id);
+    if (entry) price += entry.d;
+  }
+  return Math.round(price * 100) / 100;
+}
+
+// ----------------------------------------------------------------
+// DRINK LAB — call Anthropic directly from the browser
+// ----------------------------------------------------------------
+
+async function labCallAnthropic(brief) {
+  const apiKey = getAnthropicKey();
+  if (!apiKey) throw new Error('No Anthropic key');
+
+  labBuildPaletteFromState();
+
+  // Build palette text for the prompt
+  const paletteSummary = (() => {
+    if (!state.addons.length) return '(palette unavailable)';
+    const groups = {};
+    for (const a of state.addons) {
+      const gk = a.groupLabel;
+      if (!groups[gk]) groups[gk] = [];
+      groups[gk].push(a.name);
+    }
+    return Object.entries(groups).map(([g, names]) => `${g}: ${names.join(', ')}`).join('\n');
+  })();
+
+  const schema = labBuildSchema();
+
+  const prompt = [
+    'You are a creative drink inventor at "Thirsty Beaches," a beach-themed drink trailer.',
+    'Invent ONE drink that fits the owner\'s brief using ONLY ingredients from the palette below.',
+    'Pick a category (catKey), an optional base, and up to 6 mods by their exact palette id.',
+    'Give the drink a short punchy name (max 28 chars) and a one-line blurb (max 120 chars).',
+    '',
+    'Rules:',
+    '- Use ONLY ids from the palette list. Never invent ingredients.',
+    '- Keep it genuinely drinkable — do not pile on every modifier.',
+    '- Name and blurb must be family-appropriate for a public kiosk children use.',
+    '- Do not mention prices.',
+    '',
+    `Categories: ${CAT_KEYS.join(', ')}`,
+    '',
+    'Palette (id format is "groupKey:choiceName"):',
+    paletteSummary,
+    '',
+    `Owner brief: ${brief.slice(0, 140)}`,
+  ].join('\n');
+
+  const body = {
+    model: LAB_MODEL,
+    max_tokens: 512,
+    messages: [{ role: 'user', content: prompt }],
+    tools: [{
+      name: 'create_drink',
+      description: 'Return the invented drink as structured JSON.',
+      input_schema: schema,
+    }],
+    tool_choice: { type: 'tool', name: 'create_drink' },
+  };
+
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': apiKey,
+      'anthropic-version': ANTH_VERSION,
+      'anthropic-dangerous-direct-browser-access': 'true',
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!r.ok) {
+    const txt = await r.text().catch(() => String(r.status));
+    if (r.status === 401) throw new Error('Invalid Anthropic key — check Settings');
+    if (r.status === 429) throw new Error('Rate limit — try again in a moment');
+    throw new Error(`Anthropic error ${r.status}: ${txt.slice(0, 120)}`);
+  }
+
+  const data = await r.json();
+
+  // Extract tool_use block
+  const toolBlock = (data.content || []).find(b => b.type === 'tool_use' && b.name === 'create_drink');
+  if (!toolBlock) throw new Error('Unexpected response from Anthropic');
+  return toolBlock.input; // raw, not yet validated
+}
+
+// ----------------------------------------------------------------
+// DRINK LAB — UI helpers
+// ----------------------------------------------------------------
+
+function labRefreshKeyGate() {
+  const hasKey = !!getAnthropicKey();
+  $('lab-no-key').style.display     = hasKey ? 'none'  : '';
+  $('lab-input-section').style.display = hasKey ? '' : 'none';
+  $('lab-result').classList.remove('visible');
+  $('lab-specials-card').style.display = 'none';
+}
+
+function labSetError(msg) {
+  const el = $('lab-error');
+  el.textContent = msg;
+}
+
+function labSetSaveMsg(cls, msg) {
+  const el = $('lab-save-msg');
+  el.className = `lab-save-msg ${cls}`;
+  el.textContent = msg;
+}
+
+function labRenderResult(drink, price) {
+  $('lab-preview-name').textContent  = drink.name;
+  $('lab-preview-price').textContent = `$${price.toFixed(2)}`;
+  $('lab-preview-blurb').textContent = drink.blurb;
+
+  // Recipe chips: base + mods, show human name
+  const chips = [];
+  if (drink.base) {
+    const nm = (LAB_ADDON_MAP && LAB_ADDON_MAP.get(drink.base)) ? LAB_ADDON_MAP.get(drink.base).name : drink.base.split(':')[1];
+    chips.push(nm);
+  }
+  for (const id of (drink.mods || [])) {
+    const nm = (LAB_ADDON_MAP && LAB_ADDON_MAP.get(id)) ? LAB_ADDON_MAP.get(id).name : id.split(':')[1];
+    chips.push(nm);
+  }
+  $('lab-preview-recipe').innerHTML = chips.map(c => `<span class="lab-mod-chip">${escHtml(c)}</span>`).join('');
+
+  // Populate name edit field
+  $('lab-name-edit').value = drink.name;
+  $('lab-name-count').textContent = `${drink.name.length} / 28`;
+
+  $('lab-result').classList.add('visible');
+  $('lab-save-msg').textContent = '';
+  $('lab-save-msg').className = 'lab-save-msg';
+}
+
+function renderLabSpecials() {
+  const specials = Array.isArray(state.control?.specials) ? state.control.specials : [];
+  const card = $('lab-specials-card');
+  const list = $('lab-specials-list');
+  if (!specials.length) {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = '';
+  list.innerHTML = specials.map(sp => `
+    <div class="lab-special-row">
+      <span class="lab-special-row-name">${escHtml(sp.name)}</span>
+      <span class="lab-special-row-price">$${Number(sp.price).toFixed(2)}</span>
+      <button class="btn-lab-clear-sp" data-sp-id="${escHtml(sp.id)}">Remove</button>
+    </div>`).join('');
+  list.querySelectorAll('.btn-lab-clear-sp').forEach(btn => {
+    btn.addEventListener('click', () => labRemoveSpecial(btn.dataset.spId));
+  });
+}
+
+// ----------------------------------------------------------------
+// DRINK LAB — generate + publish flow
+// ----------------------------------------------------------------
+
+async function labGenerate() {
+  const brief = $('lab-brief-input').value.trim();
+  if (!brief) return;
+
+  labSetError('');
+  labSetSaveMsg('', '');
+  $('lab-result').classList.remove('visible');
+  $('lab-spinner').classList.add('visible');
+  $('btn-lab-generate').disabled = true;
+  $('btn-lab-regen').disabled = true;
+
+  try {
+    const raw = await labCallAnthropic(brief);
+    const drink = labValidate(raw);
+    if (!drink) throw new Error('The model returned an unworkable recipe — try a different brief.');
+    labDrink = drink;
+    const price = labComputePrice(drink.catKey, drink.base, drink.mods);
+    labDrink._price = price;
+    labRenderResult(drink, price);
+    renderLabSpecials();
+  } catch (err) {
+    labSetError(err.message || 'Generation failed — try again.');
+  } finally {
+    $('lab-spinner').classList.remove('visible');
+    $('btn-lab-generate').disabled = false;
+    if ($('btn-lab-regen')) $('btn-lab-regen').disabled = false;
+  }
+}
+
+async function labPublish() {
+  if (!labDrink) return;
+
+  // Apply any name edit
+  const editedName = $('lab-name-edit').value.trim().slice(0, 28);
+  const finalName  = editedName || labDrink.name;
+
+  // Re-run denylist on edited name
+  const safeName = labModerate(finalName) || 'Beach Special';
+
+  const cur = state.control || {};
+  const specials = Array.isArray(cur.specials) ? cur.specials.slice() : [];
+  const sp = {
+    id:          'sp-' + Date.now(),
+    name:        safeName,
+    blurb:       labDrink.blurb,
+    catKey:      labDrink.catKey,
+    base:        labDrink.base,
+    mods:        labDrink.mods,
+    baseItemId:  CAT_BASE_ITEM_IDS[labDrink.catKey] || 'pour-decisions',
+    price:       labDrink._price,
+    label:       "Today's Special",
+    createdBy:   'ai',
+    updated:     new Date().toISOString(),
+  };
+
+  // Replace strategy: one featured special at a time
+  const next = { ...cur, specials: [sp] };
+
+  labSetSaveMsg('saving', 'Publishing…');
+  $('btn-lab-publish').disabled = true;
+
+  try {
+    await scheduleWrite(next);
+    labSetSaveMsg('saved', 'Published — live on kiosk within 90s');
+    labDrink = null;
+    setTimeout(() => {
+      labSetSaveMsg('', '');
+      $('lab-result').classList.remove('visible');
+    }, 4000);
+    renderLabSpecials();
+    renderHomeQuickCards();
+  } catch (err) {
+    labSetSaveMsg('failed', `Publish failed: ${err.message}`);
+  } finally {
+    $('btn-lab-publish').disabled = false;
+  }
+}
+
+async function labRemoveSpecial(spId) {
+  const cur = state.control || {};
+  const specials = (Array.isArray(cur.specials) ? cur.specials : []).filter(s => s.id !== spId);
+  const next = { ...cur, specials };
+  try {
+    await scheduleWrite(next);
+    renderLabSpecials();
+    renderHomeQuickCards();
+  } catch (err) {
+    showErrorBanner(`Remove failed: ${err.message}`);
+  }
+}
+
+async function labClearAllSpecials() {
+  const next = { ...(state.control || {}), specials: [] };
+  try {
+    await scheduleWrite(next);
+    renderLabSpecials();
+    renderHomeQuickCards();
+  } catch (err) {
+    showErrorBanner(`Clear failed: ${err.message}`);
+  }
+}
+
+// ----------------------------------------------------------------
+// DRINK LAB — wire events
+// ----------------------------------------------------------------
+
+$('lab-brief-input').addEventListener('input', e => {
+  const len = e.target.value.length;
+  $('lab-brief-count').textContent = `${len} / 140`;
+  $('btn-lab-generate').disabled = len === 0;
+});
+
+$('btn-lab-generate').addEventListener('click', labGenerate);
+
+$('btn-lab-regen').addEventListener('click', labGenerate);
+
+$('btn-lab-publish').addEventListener('click', labPublish);
+
+$('lab-name-edit').addEventListener('input', e => {
+  const len = e.target.value.length;
+  $('lab-name-count').textContent = `${len} / 28`;
+  // Update preview name live
+  $('lab-preview-name').textContent = e.target.value || (labDrink && labDrink.name) || '';
+});
+
+// ----------------------------------------------------------------
 // SETTINGS TAB
 // ----------------------------------------------------------------
 
-// Pre-fill health URL field
+// Pre-fill health URL field and Anthropic key indicator
 function initSettingsTab() {
   const url = localStorage.getItem(LS_HEALTH) || '';
   $('health-url-input').value = url;
+  // Show placeholder in Anthropic key field if a key is stored
+  if (hasStoredAnthropicKey()) {
+    $('anthropic-key-input').placeholder = 'Key stored — paste to update';
+  }
 }
 
 $('btn-save-health-url').addEventListener('click', () => {
@@ -3066,10 +4029,41 @@ $('btn-save-health-url').addEventListener('click', () => {
   }
 });
 
+// Save Anthropic key (encrypted with the current session PIN)
+$('btn-save-anthropic-key').addEventListener('click', async () => {
+  const rawKey = $('anthropic-key-input').value.trim();
+  if (!rawKey) {
+    $('anthropic-key-save-msg').textContent = 'Paste a key first';
+    setTimeout(() => { $('anthropic-key-save-msg').textContent = ''; }, 2500);
+    return;
+  }
+  if (!rawKey.startsWith('sk-ant-')) {
+    $('anthropic-key-save-msg').textContent = 'Key should start with sk-ant-';
+    setTimeout(() => { $('anthropic-key-save-msg').textContent = ''; }, 3000);
+    return;
+  }
+  // We need the PIN to encrypt. We cache it at unlock time in state.sessionPin.
+  const pin = state.sessionPin;
+  if (!pin) {
+    $('anthropic-key-save-msg').textContent = 'Session expired — lock and re-enter PIN';
+    return;
+  }
+  try {
+    await storeAnthropicKey(pin, rawKey);
+    sessionStorage.setItem(SS_ANTH_KEY, rawKey);
+    $('anthropic-key-input').value = '';
+    $('anthropic-key-input').placeholder = 'Key stored — paste to update';
+    $('anthropic-key-save-msg').textContent = 'Key saved';
+    setTimeout(() => { $('anthropic-key-save-msg').textContent = ''; }, 2500);
+  } catch (err) {
+    $('anthropic-key-save-msg').textContent = `Save failed: ${err.message}`;
+  }
+});
+
 $('btn-wipe').addEventListener('click', () => {
   openModal(
     'Wipe All Credentials',
-    'This removes your encrypted token and PIN from this device. You will need to re-enter them. The GitHub token itself is NOT revoked.',
+    'This removes your encrypted token, Anthropic key, and PIN from this device. You will need to re-enter them. The GitHub token itself is NOT revoked.',
     () => wipeCredentials()
   );
 });
