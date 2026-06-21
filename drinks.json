@@ -371,6 +371,12 @@
    "name": "Lil' Root Beer Float",
    "category": "beachbabies",
    "categoryLabel": "Beach Babies"
+  },
+  {
+   "id": "fd-candy",
+   "name": "Freeze-Dried Candy",
+   "category": "treats",
+   "categoryLabel": "Treats"
   }
  ]
 }
