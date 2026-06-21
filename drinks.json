@@ -373,8 +373,20 @@
    "categoryLabel": "Beach Babies"
   },
   {
-   "id": "fd-candy",
-   "name": "Freeze-Dried Candy",
+   "id": "fd-candy-sm",
+   "name": "Small Bag",
+   "category": "treats",
+   "categoryLabel": "Treats"
+  },
+  {
+   "id": "fd-candy-md",
+   "name": "Medium Bag",
+   "category": "treats",
+   "categoryLabel": "Treats"
+  },
+  {
+   "id": "fd-candy-lg",
+   "name": "Large Bag",
    "category": "treats",
    "categoryLabel": "Treats"
   }
