@@ -4,15 +4,17 @@
 // It does NOT intercept GitHub API requests — those always hit the network
 // (write operations must never go through a cache).
 
-const CACHE_NAME = 'tb-control-v2';
+const CACHE_NAME = 'tb-control-logo20261018';
 
 // App shell assets to pre-cache (all relative to /owner/)
 const SHELL_ASSETS = [
   './',
   './index.html',
-  './manifest.webmanifest',
-  './icon-512.svg',
-  './icon-maskable.svg',
+  './manifest.webmanifest?v=logo20261018',
+  './logo.png?v=logo20261018',
+  './icon-192.png?v=logo20261018',
+  './icon-512.png?v=logo20261018',
+  './icon-maskable.png?v=logo20261018',
 ];
 
 // Install: pre-cache the shell
