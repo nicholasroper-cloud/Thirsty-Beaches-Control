@@ -2135,7 +2135,8 @@ let state = {
   lastActivity: Date.now(),
   inactivityTimer: null,
   writeDebounceTimer: null,
-  pendingControlState: null, // coalesced write target
+  writeQueue: [],       // queued change functions [{fn, resolve, reject}]
+  writeInflight: null,  // batch currently being PUT
   specialDrinkId: null,
   specialDrinkName: null,
   healthCheckInterval: null,
@@ -2665,40 +2666,54 @@ async function loadAddons() {
 }
 
 /**
- * Load kiosk-control.json via raw GitHub (no auth needed for reads).
- * Also fetches the blob SHA from the contents API for write operations.
+ * Load kiosk-control.json. Prefers the contents API (content + sha from the
+ * same response, so a later PUT can never be based on a stale raw-CDN copy);
+ * falls back to raw.githubusercontent.com for display if the API is unreachable.
+ * While a write is queued or in flight the server copy is not touched here —
+ * the write loop owns it until the queue drains.
  */
 async function loadControl() {
+  if (writesBusy()) { updateLastSync(); return; }
   try {
-    // Fetch the JSON content for display
-    const rawRes = await fetch(`${RAW_BASE}/kiosk-control.json?t=${Date.now()}`);
+    const remote = await fetchRemoteControl();
+    if (writesBusy()) return;
+    state.control = remote.control;
+    state.controlSha = remote.sha;
+    updateLastSync();
+    return;
+  } catch (_) { /* fall back to raw for display */ }
+  try {
+    const rawRes = await fetch(`${RAW_BASE}/kiosk-control.json?t=${Date.now()}`, { cache: 'no-store' });
     if (!rawRes.ok) throw new Error(`HTTP ${rawRes.status}`);
     const data = await rawRes.json();
+    if (writesBusy()) return;
     state.control = data;
-
-    // Fetch the SHA we'll need for writes (uses auth if available, else anonymous)
-    await refreshControlSha();
+    state.controlSha = null; // unknown: the first write re-reads it from the API
     updateLastSync();
   } catch (err) {
     showErrorBanner(`Could not load control data: ${err.message}`);
   }
 }
 
-/** GET the contents API to refresh the SHA only (needed before every write). */
+/** GET the contents API: returns { control, sha }. Throws on failure. */
+async function fetchRemoteControl() {
+  const headers = { 'Accept': 'application/vnd.github.v3+json' };
+  let token = null;
+  try { token = getSessionToken(); } catch (_) {}
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(`${API_BASE}/kiosk-control.json?t=${Date.now()}`, { headers, cache: 'no-store' });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const meta = await res.json();
+  const control = JSON.parse(base64DecodeUtf8(String(meta.content || '').replace(/\s/g, '')));
+  return { control, sha: meta.sha };
+}
+
+/** Back-compat: refresh just the sha (and content) when idle. */
 async function refreshControlSha() {
   try {
-    const headers = { 'Accept': 'application/vnd.github.v3+json' };
-    let token = null;
-    try { token = getSessionToken(); } catch (_) {}
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-
-    const res = await fetch(`${API_BASE}/kiosk-control.json`, { headers });
-    if (!res.ok) return; // sha stays null; will cause write failure handled downstream
-    const meta = await res.json();
-    state.controlSha = meta.sha;
-  } catch (_) {
-    // not fatal for reads
-  }
+    const remote = await fetchRemoteControl();
+    if (!writesBusy()) { state.control = remote.control; state.controlSha = remote.sha; }
+  } catch (_) { /* not fatal for reads */ }
 }
 
 function updateLastSync() {
@@ -2707,49 +2722,76 @@ function updateLastSync() {
 }
 
 // ----------------------------------------------------------------
-// GITHUB WRITE (read-modify-write with SHA, debounced)
+// GITHUB WRITE (serialized queue of intended changes)
 // ----------------------------------------------------------------
+//
+// Callers describe WHAT they want changed (a function control -> control),
+// not a whole new file. Changes queue up, are batched after a short pause,
+// and exactly one PUT is in flight at a time. If GitHub says the sha is stale
+// (409, or 422 sha mismatch) the file is re-read and the same changes are
+// re-applied on top of it, so neither a rapid second tap nor an edit made
+// elsewhere is lost. A caller's promise resolves only after the PUT that
+// contains its change has succeeded.
+//
+// state.control  = last copy confirmed on GitHub
+// controlView()  = state.control with every queued/in-flight change applied
+//                  (what the UI shows)
 
-/**
- * Write a new control object with debounce + coalescing.
- *
- * Rapid callers (e.g. flurry of toggle taps) share one debounced network
- * write. All pending callers are resolved or rejected together when the
- * single write completes. The written payload is always the LATEST state
- * passed in, not one payload per tap.
- *
- * Returns a promise that resolves/rejects when the coalesced write settles.
- */
-function scheduleWrite(newControl) {
-  // Always record the latest desired state
-  state.pendingControlState = { ...newControl, updated: new Date().toISOString() };
+const WRITE_DEBOUNCE_MS = 500;
+const WRITE_MAX_ATTEMPTS = 4;
 
-  // Add this caller to the shared waitlist
-  const p = new Promise((resolve, reject) => {
-    state.pendingWriteCallbacks = state.pendingWriteCallbacks || [];
-    state.pendingWriteCallbacks.push({ resolve, reject });
-  });
-
-  // Reset (or start) the debounce timer
-  if (state.writeDebounceTimer) {
-    clearTimeout(state.writeDebounceTimer);
-  }
-  state.writeDebounceTimer = setTimeout(async () => {
-    const callbacks = state.pendingWriteCallbacks || [];
-    state.pendingWriteCallbacks = [];
-    state.writeDebounceTimer = null;
-    try {
-      await commitControlWrite(state.pendingControlState);
-      callbacks.forEach(cb => cb.resolve());
-    } catch (err) {
-      callbacks.forEach(cb => cb.reject(err));
-    }
-  }, 600);
-
-  return p;
+function writesBusy() {
+  return !!(state.writeInflight || (state.writeQueue && state.writeQueue.length));
 }
 
-async function commitControlWrite(controlObj) {
+function controlView() {
+  let c = state.control || {};
+  for (const e of (state.writeInflight || [])) c = e.fn(c);
+  for (const e of (state.writeQueue || [])) c = e.fn(c);
+  return c;
+}
+
+/**
+ * Queue a change. `change` is a function (control -> new control); a plain
+ * object is accepted for back-compat and is merged as top-level fields.
+ * Returns a promise that settles when the change has landed on GitHub.
+ */
+function scheduleWrite(change) {
+  const fn = typeof change === 'function' ? change : (c => ({ ...c, ...change }));
+  return new Promise((resolve, reject) => {
+    state.writeQueue = state.writeQueue || [];
+    state.writeQueue.push({ fn, resolve, reject });
+    if (!state.writeInflight) {
+      if (state.writeDebounceTimer) clearTimeout(state.writeDebounceTimer);
+      state.writeDebounceTimer = setTimeout(flushWrites, WRITE_DEBOUNCE_MS);
+    }
+  });
+}
+
+async function flushWrites() {
+  state.writeDebounceTimer = null;
+  if (state.writeInflight || !state.writeQueue || !state.writeQueue.length) return;
+  const batch = state.writeQueue.splice(0);
+  state.writeInflight = batch;
+  try {
+    await commitControlWrite(batch.map(e => e.fn));
+    batch.forEach(e => e.resolve());
+  } catch (err) {
+    batch.forEach(e => e.reject(err));
+  } finally {
+    state.writeInflight = null;
+    if (state.writeQueue.length) {
+      state.writeDebounceTimer = setTimeout(flushWrites, 80);
+    }
+  }
+}
+
+/**
+ * PUT the file with `fns` applied on top of the current GitHub copy.
+ * Accepts a list of change functions (or, for back-compat, a whole object).
+ */
+async function commitControlWrite(fns) {
+  if (!Array.isArray(fns)) { const obj = fns; fns = [() => obj]; }
   if (!navigator.onLine) throw new Error('Offline');
 
   let token;
@@ -2762,46 +2804,44 @@ async function commitControlWrite(controlObj) {
     'Content-Type': 'application/json',
   };
 
-  // Ensure we have a fresh SHA
-  if (!state.controlSha) await refreshControlSha();
-  if (!state.controlSha) throw new Error('Cannot obtain file SHA — try refreshing');
+  for (let attempt = 0; attempt < WRITE_MAX_ATTEMPTS; attempt++) {
+    if (attempt > 0 || !state.controlSha || !state.control) {
+      // (Re-)read the real file + sha so the changes apply to what is on GitHub now
+      const remote = await fetchRemoteControl().catch(err => { throw new Error(`Could not read current file (${err.message})`); });
+      state.control = remote.control;
+      state.controlSha = remote.sha;
+    }
+    let target = state.control || {};
+    for (const fn of fns) target = fn(target);
+    target = { ...target, updated: new Date().toISOString() };
 
-  const body = JSON.stringify({
-    message: `control: update kiosk state [owner app]`,
-    content: base64EncodeUtf8(JSON.stringify(controlObj, null, 2)),
-    sha: state.controlSha,
-  });
-
-  let res = await fetch(`${API_BASE}/kiosk-control.json`, {
-    method: 'PUT', headers, body
-  });
-
-  // 409 = SHA conflict — get fresh SHA and retry once
-  if (res.status === 409) {
-    await refreshControlSha();
-    const retryBody = JSON.stringify({
-      message: `control: update kiosk state [owner app]`,
-      content: base64EncodeUtf8(JSON.stringify(controlObj, null, 2)),
-      sha: state.controlSha,
+    const res = await fetch(`${API_BASE}/kiosk-control.json`, {
+      method: 'PUT', headers, cache: 'no-store',
+      body: JSON.stringify({
+        message: `control: update kiosk state [owner app]`,
+        content: base64EncodeUtf8(JSON.stringify(target, null, 2)),
+        sha: state.controlSha,
+      }),
     });
-    res = await fetch(`${API_BASE}/kiosk-control.json`, {
-      method: 'PUT', headers, body: retryBody
-    });
-  }
 
-  if (!res.ok) {
-    const txt = await res.text().catch(() => res.status);
+    if (res.ok) {
+      const result = await res.json().catch(() => ({}));
+      state.controlSha = result.content?.sha || null;
+      state.control    = target;
+      state.lastWriteAt = Date.now();
+      updateLastSync();
+      return target;
+    }
+
+    const txt = await res.text().catch(() => '');
+    const shaConflict = res.status === 409 || (res.status === 422 && /sha/i.test(txt));
+    if (shaConflict) continue; // someone else (or an earlier tab) changed it: re-read and re-apply
     if (res.status === 401 || res.status === 403) throw new Error('Auth failed — check your token');
     if (res.status === 404) throw new Error('Repo/file not found — check token scope');
-    if (res.status === 422) throw new Error('Validation error (422) — SHA mismatch, try refreshing');
+    if (res.status === 422) throw new Error('Validation error (422)');
     throw new Error(`Write failed: HTTP ${res.status}`);
   }
-
-  // Update local state
-  const result = await res.json();
-  state.controlSha = result.content?.sha;
-  state.control    = controlObj;
-  updateLastSync();
+  throw new Error('The file kept changing on GitHub — tap to retry');
 }
 
 // ----------------------------------------------------------------
@@ -2837,16 +2877,17 @@ function showErrorBanner(msg) {
 
 function renderHomeQuickCards() {
   if (!state.control) return;
+  const view = controlView();
 
   // Sold-out count (drinks + add-ons combined)
-  const drinkCount  = (state.control.soldOut || []).length;
-  const addonCount  = (state.control.soldOutOptions || []).length;
+  const drinkCount  = (view.soldOut || []).length;
+  const addonCount  = (view.soldOutOptions || []).length;
   const totalCount  = drinkCount + addonCount;
   $('qc-soldout-count').textContent = totalCount === 0 ? 'None' : totalCount;
 
   // Special (prefer specials[] array; fall back to legacy special field)
-  const specials = Array.isArray(state.control.specials) ? state.control.specials : [];
-  const sp = state.control.special;
+  const specials = Array.isArray(view.specials) ? view.specials : [];
+  const sp = view.special;
   if (specials.length) {
     $('qc-special-val').textContent = specials.length === 1
       ? truncate(specials[0].name, 10)
@@ -2938,7 +2979,7 @@ function renderDrinkList(filter = '') {
   const container = $('drink-list-container');
   if (!state.drinks.length) return;
 
-  const soldOut = new Set(state.control?.soldOut || []);
+  const soldOut = new Set(controlView().soldOut || []);
   const q = filter.toLowerCase().trim();
 
   // Group by category
@@ -3017,9 +3058,23 @@ function buildDrinkRow(drink, isSoldOut) {
     </div>`;
 }
 
+/** Change function: put `id` in (or take it out of) the list field `key`. */
+function setListMember(key, id, on) {
+  return c => {
+    const set = new Set(Array.isArray(c[key]) ? c[key] : []);
+    if (on) set.add(id); else set.delete(id);
+    return { ...c, [key]: Array.from(set) };
+  };
+}
+
+let toggleSeq = 0;
+const lastToggleTicket = {};
+
 /**
- * Handle toggle tap with optimistic flip + per-row status chip.
- * Coalesces rapid taps for the same drink into a single write.
+ * Handle toggle tap: flip the row at once, queue the change, and show
+ * "Saved" only when the PUT carrying it has landed on GitHub.
+ * The intended value is computed from controlView() (which includes changes
+ * still waiting to be written), so rapid taps on different rows all land.
  */
 async function handleToggle(drinkId) {
   if (!navigator.onLine) {
@@ -3027,41 +3082,38 @@ async function handleToggle(drinkId) {
     return;
   }
 
-  // Optimistic flip
-  const soldOut = new Set(state.control?.soldOut || []);
-  const wasOut = soldOut.has(drinkId);
-  if (wasOut) soldOut.delete(drinkId); else soldOut.add(drinkId);
+  const willBeOut = !(controlView().soldOut || []).includes(drinkId);
+  const ticket = ++toggleSeq;
+  lastToggleTicket['d:' + drinkId] = ticket;
 
-  // Update optimistic UI
-  flipToggleUI(drinkId, !wasOut);
+  flipToggleUI(drinkId, willBeOut);
   setRowStatus(drinkId, 'saving', 'Saving…');
-
-  // Build new control state (preserve special)
-  const newControl = {
-    ...state.control,
-    soldOut: Array.from(soldOut),
-  };
+  refreshSoldOutCounts();
 
   try {
-    await scheduleWrite(newControl);
+    await scheduleWrite(setListMember('soldOut', drinkId, willBeOut));
+    if (lastToggleTicket['d:' + drinkId] !== ticket) return; // a newer tap on this row owns the status
     setRowStatus(drinkId, 'saved', 'Saved');
-    setTimeout(() => setRowStatus(drinkId, '', ''), 2500);
-    // Update quick card
-    $('qc-soldout-count').textContent = soldOut.size || 'None';
-    $('clear-all-row').style.display = soldOut.size > 0 ? 'flex' : 'none';
+    setTimeout(() => { if (lastToggleTicket['d:' + drinkId] === ticket) setRowStatus(drinkId, '', ''); }, 2500);
   } catch (err) {
-    // Rollback
-    flipToggleUI(drinkId, wasOut);
-    // Re-sync local state to rolled-back value
-    if (wasOut) soldOut.add(drinkId); else soldOut.delete(drinkId);
-    state.control = { ...state.control, soldOut: Array.from(soldOut) };
+    if (lastToggleTicket['d:' + drinkId] !== ticket) return;
+    // Show what is really true now (the failed change is no longer queued)
+    flipToggleUI(drinkId, (controlView().soldOut || []).includes(drinkId));
     setRowStatus(drinkId, 'failed', `Didn't save — tap to retry`);
-    // Wire retry
     const statusEl = $(`status-${drinkId}`);
-    if (statusEl) {
-      statusEl.onclick = () => handleToggle(drinkId);
-    }
+    if (statusEl) statusEl.onclick = () => handleToggle(drinkId);
+  } finally {
+    refreshSoldOutCounts();
   }
+}
+
+/** Quick-card count + clear-all visibility from the current view. */
+function refreshSoldOutCounts() {
+  const view = controlView();
+  const d = (view.soldOut || []).length, a = (view.soldOutOptions || []).length;
+  $('qc-soldout-count').textContent = (d + a) || 'None';
+  $('clear-all-row').style.display = d > 0 ? 'flex' : 'none';
+  $('clear-all-addons-row').style.display = a > 0 ? 'flex' : 'none';
 }
 
 function flipToggleUI(drinkId, isSoldOut) {
@@ -3108,13 +3160,14 @@ $('btn-clear-all').addEventListener('click', () => {
     'Clear All Sold Out',
     'This will mark all drinks as available on the kiosk.',
     async () => {
-      const newControl = { ...state.control, soldOut: [] };
+      const p = scheduleWrite(c => ({ ...c, soldOut: [] }));
+      renderDrinkList($('drink-search').value);
       try {
-        await commitControlWrite({ ...newControl, updated: new Date().toISOString() });
-        state.control = { ...newControl };
+        await p;
         renderDrinkList($('drink-search').value);
         renderHomeQuickCards();
       } catch (err) {
+        renderDrinkList($('drink-search').value);
         showErrorBanner(`Clear failed: ${err.message}`);
       }
     }
@@ -3147,13 +3200,14 @@ $('btn-clear-all-addons').addEventListener('click', () => {
     'Clear All Add-ons Sold Out',
     'This will mark all add-ons as available on the kiosk.',
     async () => {
-      const newControl = { ...state.control, soldOutOptions: [] };
+      const p = scheduleWrite(c => ({ ...c, soldOutOptions: [] }));
+      renderAddonList($('addon-search').value);
       try {
-        await commitControlWrite({ ...newControl, updated: new Date().toISOString() });
-        state.control = { ...newControl };
+        await p;
         renderAddonList($('addon-search').value);
         renderHomeQuickCards();
       } catch (err) {
+        renderAddonList($('addon-search').value);
         showErrorBanner(`Clear failed: ${err.message}`);
       }
     }
@@ -3172,7 +3226,7 @@ function renderAddonList(filter = '') {
   const container = $('addon-list-container');
   if (!state.addons.length) return;
 
-  const soldOutOpts = new Set(state.control?.soldOutOptions || []);
+  const soldOutOpts = new Set(controlView().soldOutOptions || []);
   const q = filter.toLowerCase().trim();
 
   // Group addons — preserve order from addons.json, filter by name/group
@@ -3244,40 +3298,35 @@ function buildAddonRow(addon, isSoldOut) {
     </div>`;
 }
 
-/** Optimistic toggle for a single add-on, same pattern as handleToggle for drinks. */
+/** Toggle a single add-on — same queue/landed semantics as handleToggle. */
 async function handleAddonToggle(addonId) {
   if (!navigator.onLine) {
     setAddonRowStatus(addonId, 'failed', 'Offline — tap to retry');
     return;
   }
 
-  const soldOutOpts = new Set(state.control?.soldOutOptions || []);
-  const wasOut = soldOutOpts.has(addonId);
-  if (wasOut) soldOutOpts.delete(addonId); else soldOutOpts.add(addonId);
+  const willBeOut = !(controlView().soldOutOptions || []).includes(addonId);
+  const ticket = ++toggleSeq;
+  lastToggleTicket['a:' + addonId] = ticket;
 
-  flipAddonToggleUI(addonId, !wasOut);
+  flipAddonToggleUI(addonId, willBeOut);
   setAddonRowStatus(addonId, 'saving', 'Saving…');
-
-  // Build new control — preserve soldOut and special, only touch soldOutOptions
-  const newControl = {
-    ...state.control,
-    soldOutOptions: Array.from(soldOutOpts),
-  };
+  refreshSoldOutCounts();
 
   try {
-    await scheduleWrite(newControl);
+    await scheduleWrite(setListMember('soldOutOptions', addonId, willBeOut));
+    if (lastToggleTicket['a:' + addonId] !== ticket) return;
     setAddonRowStatus(addonId, 'saved', 'Saved');
-    setTimeout(() => setAddonRowStatus(addonId, '', ''), 2500);
-    $('clear-all-addons-row').style.display = soldOutOpts.size > 0 ? 'flex' : 'none';
+    setTimeout(() => { if (lastToggleTicket['a:' + addonId] === ticket) setAddonRowStatus(addonId, '', ''); }, 2500);
   } catch (err) {
-    // Rollback
-    flipAddonToggleUI(addonId, wasOut);
-    if (wasOut) soldOutOpts.add(addonId); else soldOutOpts.delete(addonId);
-    state.control = { ...state.control, soldOutOptions: Array.from(soldOutOpts) };
+    if (lastToggleTicket['a:' + addonId] !== ticket) return;
+    flipAddonToggleUI(addonId, (controlView().soldOutOptions || []).includes(addonId));
     setAddonRowStatus(addonId, 'failed', `Didn't save — tap to retry`);
     const domId = 'addon-' + addonId.replace(/:/g, '-').replace(/[^a-zA-Z0-9-_]/g, '_');
     const statusEl = $(`status-${domId}`);
     if (statusEl) statusEl.onclick = () => handleAddonToggle(addonId);
+  } finally {
+    refreshSoldOutCounts();
   }
 }
 
@@ -3336,14 +3385,8 @@ $('btn-make-special').addEventListener('click', async () => {
   const label = $('special-label-input').value.trim();
   if (!label || label.length > 24) return;
 
-  const newControl = {
-    ...state.control,
-    special: {
-      title:   label,
-      detail:  '',
-      drinkId: state.specialDrinkId,
-    },
-  };
+  const special = { title: label, detail: '', drinkId: state.specialDrinkId };
+  const newControl = c => ({ ...c, special });
 
   setSpecialSaveStatus('saving', 'Saving…');
   try {
@@ -3361,7 +3404,7 @@ $('btn-clear-special').addEventListener('click', async () => {
     'Clear Daily Special',
     'This will remove the daily special from the kiosk.',
     async () => {
-      const newControl = { ...state.control, special: null };
+      const newControl = c => ({ ...c, special: null });
       setSpecialSaveStatus('saving', 'Clearing…');
       try {
         await scheduleWrite(newControl);
@@ -3878,7 +3921,8 @@ function labRenderResult(drink, price) {
 }
 
 function renderLabSpecials() {
-  const specials = Array.isArray(state.control?.specials) ? state.control.specials : [];
+  const view = controlView();
+  const specials = Array.isArray(view.specials) ? view.specials : [];
   const card = $('lab-specials-card');
   const list = $('lab-specials-list');
   if (!specials.length) {
@@ -3940,8 +3984,6 @@ async function labPublish() {
   // Re-run denylist on edited name
   const safeName = labModerate(finalName) || 'Beach Special';
 
-  const cur = state.control || {};
-  const specials = Array.isArray(cur.specials) ? cur.specials.slice() : [];
   const sp = {
     id:          'sp-' + Date.now(),
     name:        safeName,
@@ -3957,7 +3999,7 @@ async function labPublish() {
   };
 
   // Replace strategy: one featured special at a time
-  const next = { ...cur, specials: [sp] };
+  const next = c => ({ ...c, specials: [sp] });
 
   labSetSaveMsg('saving', 'Publishing…');
   $('btn-lab-publish').disabled = true;
@@ -3980,9 +4022,7 @@ async function labPublish() {
 }
 
 async function labRemoveSpecial(spId) {
-  const cur = state.control || {};
-  const specials = (Array.isArray(cur.specials) ? cur.specials : []).filter(s => s.id !== spId);
-  const next = { ...cur, specials };
+  const next = c => ({ ...c, specials: (Array.isArray(c.specials) ? c.specials : []).filter(s => s.id !== spId) });
   try {
     await scheduleWrite(next);
     renderLabSpecials();
@@ -3993,7 +4033,7 @@ async function labRemoveSpecial(spId) {
 }
 
 async function labClearAllSpecials() {
-  const next = { ...(state.control || {}), specials: [] };
+  const next = c => ({ ...c, specials: [] });
   try {
     await scheduleWrite(next);
     renderLabSpecials();
@@ -4170,7 +4210,8 @@ async function renderKioskStatus() {
 
 function renderKioskSettingsForm() {
   const box = $('kiosk-settings-fields');
-  const cur = (state.control && state.control.settings && typeof state.control.settings === 'object') ? state.control.settings : {};
+  const view = controlView();
+  const cur = (view.settings && typeof view.settings === 'object') ? view.settings : {};
   box.textContent = '';
   for (const f of KIOSK_SETTINGS) {
     const g = document.createElement('div'); g.className = 'settings-field-group';
@@ -4223,7 +4264,8 @@ async function sendKioskCommand(name, okText) {
   const msg = $('kiosk-cmd-msg');
   if (!state.control) { msg.textContent = 'Not loaded yet — tap Refresh on Home'; return; }
   msg.textContent = 'Sending…';
-  const next = { ...state.control, commands: { ...(state.control.commands || {}), [name]: new Date().toISOString() } };
+  const at = new Date().toISOString();
+  const next = c => ({ ...c, commands: { ...(c.commands || {}), [name]: at } });
   try { await scheduleWrite(next); msg.textContent = okText; }
   catch (err) { msg.textContent = `Failed: ${err.message}`; }
   setTimeout(() => { msg.textContent = ''; }, 6000);
@@ -4239,12 +4281,12 @@ $('btn-kiosk-settings-save').addEventListener('click', async () => {
   if (!state.control) { msg.textContent = 'Not loaded yet — tap Refresh on Home'; return; }
   const { settings, errors } = readKioskSettingsForm();
   if (errors.length) { msg.textContent = 'Fix: ' + errors.join(' · '); return; }
-  const before = (state.control.settings || {});
+  const before = (controlView().settings || {});
   if (settings.PAY_ENABLED === true && before.PAY_ENABLED !== true &&
       !confirm('Turn ON tap-to-pay at the kiosk? Customers will be asked to tap their card on the Flex. Only do this once the Flex is paired and tested.')) return;
   msg.textContent = 'Saving…';
   try {
-    await scheduleWrite({ ...state.control, settings });
+    await scheduleWrite(c => ({ ...c, settings }));
     msg.textContent = Object.keys(settings).length ? 'Saved — the kiosk applies it within ~90 s' : 'Saved — the kiosk uses kiosk-config.env only';
   } catch (err) { msg.textContent = `Save failed: ${err.message}`; }
   setTimeout(() => { msg.textContent = ''; }, 6000);
