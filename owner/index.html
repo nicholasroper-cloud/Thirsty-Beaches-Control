@@ -1194,6 +1194,25 @@
       min-height: 18px;
     }
 
+    /* "On the kiosk now" (Daily Special tab) */
+    .special-live-row {
+      display: flex; flex-direction: column; gap: 2px;
+      padding: 12px 14px; border-radius: 14px;
+      background: rgba(17,138,78,0.07); border: 1.5px solid rgba(17,138,78,0.28);
+      margin-bottom: 8px;
+    }
+    .special-live-row:last-child { margin-bottom: 0; }
+    .special-live-tag { font-size: 13px; font-weight: 800; color: var(--green-live); }
+    .special-live-name { font-size: 17px; font-weight: 800; color: var(--ink); }
+    .special-live-src { font-size: 13px; color: #46576c; }
+    .special-live-none { font-size: 14px; color: #46576c; }
+    .special-legacy-warn {
+      margin-top: 10px; padding: 10px 12px; border-radius: 12px;
+      background: rgba(255,138,43,0.10); border: 1.5px solid rgba(255,138,43,0.45);
+      font-size: 14px; color: var(--ink); line-height: 1.4;
+    }
+    .special-replace-note { font-size: 13px; color: #46576c; margin-top: 10px; }
+
     /* Current specials summary in Lab */
     .lab-specials-list {
       display: flex;
@@ -1768,6 +1787,14 @@
           <p>Set a featured drink that shows on the kiosk</p>
         </div>
 
+        <!-- What the kiosk shows right now (specials[] in kiosk-control.json) -->
+        <div class="special-card" id="special-live-card">
+          <div class="special-card-title">On the kiosk now</div>
+          <div id="special-live-area" role="status" aria-live="polite">
+            <div class="special-live-none">Loading…</div>
+          </div>
+        </div>
+
         <!-- Live preview -->
         <div class="special-card">
           <div class="special-card-title">Preview</div>
@@ -1805,6 +1832,7 @@
             <button class="btn-clear-special" id="btn-clear-special">Clear</button>
           </div>
 
+          <p class="special-replace-note">One featured special at a time: this replaces whatever is on the kiosk now (including a Drink Lab special).</p>
           <p class="save-status-msg" id="special-save-status" role="status" aria-live="polite"></p>
         </div>
 
@@ -2570,6 +2598,7 @@ function switchTab(name) {
   }
 
   if (name === 'lock') renderKioskCard();
+  if (name === 'special') renderSpecialLive();
 
   // Refresh lab key gate and live specials when entering Drink Lab
   if (name === 'lab') {
@@ -2887,14 +2916,15 @@ function renderHomeQuickCards() {
 
   // Special (prefer specials[] array; fall back to legacy special field)
   const specials = Array.isArray(view.specials) ? view.specials : [];
-  const sp = view.special;
   if (specials.length) {
     $('qc-special-val').textContent = specials.length === 1
       ? truncate(specials[0].name, 10)
       : `${specials.length} live`;
   } else {
-    $('qc-special-val').textContent = sp ? truncate(sp.title || sp.drinkId, 10) : 'None';
+    // A legacy-only `special` is not shown by the kiosk, so it is not "live"
+    $('qc-special-val').textContent = 'None';
   }
+  renderSpecialLive();
 
   updateLastSync();
 }
@@ -3385,26 +3415,32 @@ $('btn-make-special').addEventListener('click', async () => {
   const label = $('special-label-input').value.trim();
   if (!label || label.length > 24) return;
 
-  const special = { title: label, detail: '', drinkId: state.specialDrinkId };
-  const newControl = c => ({ ...c, special });
+  const drink = state.drinks.find(d => d.id === state.specialDrinkId);
+  if (!drink) return;
+  const sp = buildMenuSpecial(drink, label);
+  // The kiosk reads only specials[]; the legacy `special` field is cleared so
+  // the file has one source of truth.
+  const newControl = c => ({ ...c, specials: [sp], special: null });
 
   setSpecialSaveStatus('saving', 'Saving…');
+  const p = scheduleWrite(newControl);
+  renderHomeQuickCards();
   try {
-    await scheduleWrite(newControl);
-    setSpecialSaveStatus('saved', 'Special saved');
-    setTimeout(() => setSpecialSaveStatus('', ''), 3000);
-    renderHomeQuickCards();
+    await p;
+    setSpecialSaveStatus('saved', `Saved — ${sp.name} is the special`);
+    setTimeout(() => setSpecialSaveStatus('', ''), 5000);
   } catch (err) {
     setSpecialSaveStatus('failed', `Save failed: ${err.message}`);
   }
+  renderHomeQuickCards();
 });
 
 $('btn-clear-special').addEventListener('click', async () => {
   openModal(
     'Clear Daily Special',
-    'This will remove the daily special from the kiosk.',
+    'This removes the featured special from the kiosk (including a Drink Lab special).',
     async () => {
-      const newControl = c => ({ ...c, special: null });
+      const newControl = c => ({ ...c, specials: [], special: null });
       setSpecialSaveStatus('saving', 'Clearing…');
       try {
         await scheduleWrite(newControl);
@@ -3422,6 +3458,7 @@ $('btn-clear-special').addEventListener('click', async () => {
         renderHomeQuickCards();
       } catch (err) {
         setSpecialSaveStatus('failed', `Clear failed: ${err.message}`);
+        renderHomeQuickCards();
       }
     }
   );
@@ -3447,14 +3484,63 @@ function updateSpecialPreview() {
     <div class="special-preview">
       <div class="special-preview-tag">${escHtml(label || 'Daily Special')}</div>
       <div class="special-preview-name">${escHtml(name)}</div>
-      <div class="special-preview-detail">Ask about today's featured drink</div>
+      <div class="special-preview-detail">Today's featured drink</div>
     </div>`;
 }
 
-/** Pre-fill form from loaded control state */
+/**
+ * A specials[] entry for a regular menu drink, in the shape the kiosk reads
+ * (same fields the Drink Lab writes). The kiosk prices it from baseItemId
+ * (the real menu item) and greys it out when that drink is sold out.
+ */
+function buildMenuSpecial(drink, label) {
+  return {
+    id:         'sp-menu-' + drink.id + '-' + Date.now(),
+    name:       String(drink.name).slice(0, 28),
+    blurb:      "Today's featured drink",
+    catKey:     drink.category,
+    base:       null,
+    mods:       [],
+    baseItemId: drink.id,
+    drinkId:    drink.id,
+    label:      label,
+    createdBy:  'owner',
+    updated:    new Date().toISOString(),
+  };
+}
+
+/** "On the kiosk now" card: what specials[] holds (incl. queued changes). */
+function renderSpecialLive() {
+  const area = $('special-live-area');
+  if (!area || !state.control) return;
+  const view = controlView();
+  const specials = Array.isArray(view.specials) ? view.specials : [];
+  const pending = writesBusy();
+  let html = '';
+  if (specials.length) {
+    html = specials.map(sp => `
+      <div class="special-live-row">
+        <span class="special-live-tag">${escHtml(sp.label || "Today's Special")}</span>
+        <span class="special-live-name">${escHtml(sp.name || '')}</span>
+        <span class="special-live-src">${sp.createdBy === 'ai' ? 'From Drink Lab' : 'Menu drink'}${pending ? ' · saving…' : ''}</span>
+      </div>`).join('');
+  } else {
+    html = `<div class="special-live-none">Nothing featured on the kiosk${pending ? ' (saving…)' : ''}</div>`;
+  }
+  const legacy = view.special;
+  if (legacy && !specials.length) {
+    const d = state.drinks.find(x => x.id === legacy.drinkId);
+    html += `<div class="special-legacy-warn">“${escHtml(legacy.title || 'Special')} · ${escHtml(d ? d.name : legacy.drinkId || '')}” was saved in the old format, which the kiosk does not show. Tap <b>Make it the Special</b> to put it live.</div>`;
+  }
+  area.innerHTML = html;
+}
+
+/** Pre-fill form from loaded control state (live menu special, else legacy field) */
 function syncSpecialFormFromState() {
-  const sp = state.control?.special;
-  if (!sp) return;
+  const view = controlView();
+  const live = (Array.isArray(view.specials) ? view.specials : []).find(x => x.drinkId);
+  const sp = live ? { title: live.label, drinkId: live.drinkId } : view.special;
+  if (!sp || !sp.drinkId) return;
   state.specialDrinkId = sp.drinkId;
   const drink = state.drinks.find(d => d.id === sp.drinkId);
   state.specialDrinkName = drink ? drink.name : sp.drinkId;

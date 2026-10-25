@@ -8,8 +8,8 @@ on github.com. This repo is **public**: never put a secret in this file.
 {
   "soldOut": ["drink-id", ...],        // drink ids to grey out on the kiosk (see drinks.json)
   "soldOutOptions": ["addon-id", ...], // add-on ids to grey out (see addons.json)
-  "special": null,                     // legacy single special: { "title", "detail", "drinkId" } or null
-  "specials": [ ... ],                 // Drink Lab specials (written by the owner app)
+  "special": null,                     // LEGACY, ignored by the kiosk. The owner app clears it on save.
+  "specials": [ ... ],                 // featured specials the kiosk shows (see below)
   "healthcheckUrl": "https://hc-ping.com/…", // optional: overrides HEALTHCHECK_URL on the kiosk
   "updated": "ISO-8601 string",        // last write time (set by the owner app)
 
@@ -19,6 +19,32 @@ on github.com. This repo is **public**: never put a secret in this file.
 ```
 
 Kiosks older than v24 ignore `settings` and `commands`.
+
+## specials — what the kiosk features
+
+The kiosk shows every entry in `specials[]` as a "Today's Specials" card (and ignores the legacy
+`special` field entirely). The owner app keeps one at a time: both the Daily Special tab and the
+Drink Lab replace the list. Entry shape:
+
+```jsonc
+{
+  "id": "sp-menu-swole-patrol-1761424289348", // unique; the kiosk re-renders when id/updated change
+  "name": "Thicc & Thirsty",          // ≤28 chars, shown as the card title
+  "label": "Staff Pick",              // small tag above the name (default "Today's Special")
+  "blurb": "Today's featured drink",
+  "catKey": "floats",                 // kiosk MENU category; unknown key = card skipped
+  "baseItemId": "swole-patrol",       // menu item the price is computed from; sold out = card greyed
+  "base": null, "mods": [],           // "group:Choice" ids (Drink Lab recipes)
+  "drinkId": "swole-patrol",          // set for a regular menu drink (Daily Special tab)
+  "price": 7.5,                       // informational; the kiosk re-prices from its own menu
+  "createdBy": "owner" | "ai",
+  "updated": "ISO-8601"
+}
+```
+
+Known kiosk limitation: tapping a special opens the generic customizer (`openAIDrink`) priced from
+the category's build-your-own item, even for a menu drink. A kiosk fix is to open the real item
+when `drinkId` is set (`openItem(sp.catKey, sp.drinkId)`).
 
 ## settings — remote overrides of kiosk-config.env
 
