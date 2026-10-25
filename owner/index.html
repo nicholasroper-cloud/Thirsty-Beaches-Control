@@ -1907,6 +1907,25 @@
           </button>
         </div>
 
+        <div class="lock-card" id="kiosk-remote-card">
+          <div class="lock-card-title">Kiosk (remote control)</div>
+          <div class="lock-card-desc" id="kiosk-remote-status">Checking kiosk status…</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <button class="btn-secondary" id="btn-kiosk-update" type="button">Check for update now</button>
+            <button class="btn-secondary" id="btn-kiosk-reload" type="button">Reload screen</button>
+            <button class="btn-secondary" id="btn-kiosk-restart" type="button">Restart kiosk server</button>
+          </div>
+          <div class="settings-save-msg" id="kiosk-cmd-msg" role="status" aria-live="polite"></div>
+          <div class="lock-card-desc" style="margin-top:14px;">
+            Kiosk settings. Blank / “Use kiosk file” = the value in kiosk-config.env on the PC.
+            The kiosk picks changes up within ~90 s; tap-to-pay changes restart the kiosk server when nobody is ordering.
+            Secrets (Clover token, API keys) can never be set here.
+          </div>
+          <div id="kiosk-settings-fields"></div>
+          <button class="btn-secondary" id="btn-kiosk-settings-save" type="button" style="margin-top:4px;">Save kiosk settings</button>
+          <div class="settings-save-msg" id="kiosk-settings-msg" role="status" aria-live="polite"></div>
+        </div>
+
         <div class="lock-card">
           <div class="lock-card-title">Uptime Monitor</div>
           <div class="lock-card-desc">
@@ -2548,6 +2567,8 @@ function switchTab(name) {
     if (state.soldOutSeg === 'addons' && state.addons.length > 0) renderAddonList();
     else if (state.drinks.length > 0) renderDrinkList();
   }
+
+  if (name === 'lock') renderKioskCard();
 
   // Refresh lab key gate and live specials when entering Drink Lab
   if (name === 'lab') {
@@ -4108,6 +4129,126 @@ function initA2HS() {
     localStorage.setItem(LS_A2HS, '1');
   });
 }
+
+// ----------------------------------------------------------------
+// KIOSK REMOTE CONTROL (kiosk-control.json "commands" + "settings")
+// Same allow-list and limits as the kiosk (kiosk-lib.js); the kiosk
+// re-validates everything anyway. See ../control-schema.md.
+// ----------------------------------------------------------------
+const KIOSK_STATUS_URL = 'https://tb-where.nicholasroper.workers.dev/kiosk/status';
+const KIOSK_SETTINGS = [
+  { key: 'PAY_ENABLED',         label: 'Tap-to-pay (Clover Flex)',              type: 'bool' },
+  { key: 'FLEX_IP',             label: 'Flex IP address',                       type: 'ip',    ph: 'e.g. 192.168.1.50' },
+  { key: 'FLEX_PORT',           label: 'Flex port',                             type: 'int',   min: 1,     max: 65535,  ph: '12345' },
+  { key: 'PAY_TIMEOUT_MS',      label: 'Card tap timeout (ms)',                 type: 'int',   min: 15000, max: 300000, ph: '90000' },
+  { key: 'AI_DESIGN_ENABLED',   label: 'AI “Design your own”',                  type: 'bool' },
+  { key: 'VIBE_MODEL',          label: 'Vibe match AI model',                   type: 'model', ph: 'claude-haiku-4-5' },
+  { key: 'DRINK_MODEL',         label: 'Design-your-own AI model',              type: 'model', ph: 'claude-haiku-4-5' },
+  { key: 'HIDE_CATEGORIES',     label: 'Hidden Clover categories (comma list)', type: 'list',  ph: 'e.g. Staff, Retail' },
+  { key: 'UPDATE_INTERVAL_MIN', label: 'Check for updates every (minutes)',     type: 'int',   min: 5,     max: 1440,   ph: '60' },
+];
+const KIOSK_IP_RE = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
+const KIOSK_MODEL_RE = /^claude-[a-z0-9][a-z0-9.\-]{0,60}$/;
+
+function kioskAgo(min) {
+  if (min == null) return '?';
+  if (min < 1) return 'just now';
+  if (min < 90) return `${min} min ago`;
+  if (min < 2880) return `${Math.round(min / 60)} h ago`;
+  return `${Math.round(min / 1440)} days ago`;
+}
+
+async function renderKioskStatus() {
+  const el = $('kiosk-remote-status');
+  try {
+    const d = await (await fetch(KIOSK_STATUS_URL, { cache: 'no-store' })).json();
+    el.textContent = d && d.lastSeen
+      ? `Kiosk: ${d.online ? 'online' : 'OFFLINE'} · v${d.version} · seen ${kioskAgo(d.ageMin)}. Details: thirstybeaches.com/trailer`
+      : 'Kiosk: no status reports yet (it starts reporting after the v24 switch-over restart).';
+  } catch (_) { el.textContent = 'Kiosk status unavailable right now.'; }
+}
+
+function renderKioskSettingsForm() {
+  const box = $('kiosk-settings-fields');
+  const cur = (state.control && state.control.settings && typeof state.control.settings === 'object') ? state.control.settings : {};
+  box.textContent = '';
+  for (const f of KIOSK_SETTINGS) {
+    const g = document.createElement('div'); g.className = 'settings-field-group';
+    const l = document.createElement('label'); l.className = 'settings-label'; l.htmlFor = 'ks-' + f.key; l.textContent = f.label;
+    let input;
+    if (f.type === 'bool') {
+      input = document.createElement('select');
+      for (const [v, t] of [['', 'Use kiosk file'], ['true', 'On'], ['false', 'Off']]) {
+        const o = document.createElement('option'); o.value = v; o.textContent = t; input.appendChild(o);
+      }
+      input.value = cur[f.key] === true ? 'true' : cur[f.key] === false ? 'false' : '';
+    } else {
+      input = document.createElement('input');
+      input.type = f.type === 'int' ? 'number' : 'text';
+      input.placeholder = (f.ph || '') + ' (blank = kiosk file)';
+      input.autocomplete = 'off'; input.spellcheck = false;
+      const v = cur[f.key];
+      input.value = v == null ? '' : Array.isArray(v) ? v.join(', ') : String(v);
+    }
+    input.className = 'settings-input'; input.id = 'ks-' + f.key;
+    g.appendChild(l); g.appendChild(input); box.appendChild(g);
+  }
+}
+
+function readKioskSettingsForm() {
+  const out = {}, errors = [];
+  for (const f of KIOSK_SETTINGS) {
+    const raw = $('ks-' + f.key).value.trim();
+    if (raw === '') continue;
+    if (f.type === 'bool') out[f.key] = raw === 'true';
+    else if (f.type === 'int') {
+      const n = Number(raw);
+      if (!Number.isInteger(n) || n < f.min || n > f.max) errors.push(`${f.label}: ${f.min}–${f.max}`); else out[f.key] = n;
+    } else if (f.type === 'ip') { if (!KIOSK_IP_RE.test(raw)) errors.push(`${f.label}: like 192.168.1.50`); else out[f.key] = raw; }
+    else if (f.type === 'model') { if (!KIOSK_MODEL_RE.test(raw)) errors.push(`${f.label}: like claude-haiku-4-5`); else out[f.key] = raw; }
+    else if (f.type === 'list') {
+      const list = raw.split(',').map(x => x.trim()).filter(Boolean);
+      if (list.length > 50 || list.some(x => x.length > 60)) errors.push(`${f.label}: too long`); else out[f.key] = list;
+    }
+  }
+  return { settings: out, errors };
+}
+
+function renderKioskCard() {
+  renderKioskStatus();
+  renderKioskSettingsForm();
+}
+
+async function sendKioskCommand(name, okText) {
+  const msg = $('kiosk-cmd-msg');
+  if (!state.control) { msg.textContent = 'Not loaded yet — tap Refresh on Home'; return; }
+  msg.textContent = 'Sending…';
+  const next = { ...state.control, commands: { ...(state.control.commands || {}), [name]: new Date().toISOString() } };
+  try { await scheduleWrite(next); msg.textContent = okText; }
+  catch (err) { msg.textContent = `Failed: ${err.message}`; }
+  setTimeout(() => { msg.textContent = ''; }, 6000);
+}
+$('btn-kiosk-update').addEventListener('click', () => sendKioskCommand('checkUpdateAt', 'Sent — the kiosk checks for an update within ~90 s'));
+$('btn-kiosk-reload').addEventListener('click', () => sendKioskCommand('reloadScreenAt', 'Sent — the screen reloads the next time nobody is using it'));
+$('btn-kiosk-restart').addEventListener('click', () => {
+  if (!confirm('Restart the kiosk server? It waits until nobody is ordering, and is back in a few seconds.')) return;
+  sendKioskCommand('restartAt', 'Sent — restarts when the kiosk is idle');
+});
+$('btn-kiosk-settings-save').addEventListener('click', async () => {
+  const msg = $('kiosk-settings-msg');
+  if (!state.control) { msg.textContent = 'Not loaded yet — tap Refresh on Home'; return; }
+  const { settings, errors } = readKioskSettingsForm();
+  if (errors.length) { msg.textContent = 'Fix: ' + errors.join(' · '); return; }
+  const before = (state.control.settings || {});
+  if (settings.PAY_ENABLED === true && before.PAY_ENABLED !== true &&
+      !confirm('Turn ON tap-to-pay at the kiosk? Customers will be asked to tap their card on the Flex. Only do this once the Flex is paired and tested.')) return;
+  msg.textContent = 'Saving…';
+  try {
+    await scheduleWrite({ ...state.control, settings });
+    msg.textContent = Object.keys(settings).length ? 'Saved — the kiosk applies it within ~90 s' : 'Saved — the kiosk uses kiosk-config.env only';
+  } catch (err) { msg.textContent = `Save failed: ${err.message}`; }
+  setTimeout(() => { msg.textContent = ''; }, 6000);
+});
 
 // ----------------------------------------------------------------
 // UTILITY
