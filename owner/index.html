@@ -340,12 +340,41 @@
       padding-bottom: calc(80px + env(safe-area-inset-bottom));
     }
 
-    /* Individual tab pages */
+    /* Individual tab pages (the kiosk strip above carries the safe-area inset) */
     .tab-page {
       display: none;
       padding: 16px;
-      padding-top: calc(env(safe-area-inset-top, 0px) + 16px);
+      padding-top: 12px;
     }
+
+    /* Kiosk status strip (top of every tab) */
+    .kiosk-strip {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 32px;
+      padding: calc(env(safe-area-inset-top, 0px) + 6px) 16px 6px;
+      background: rgba(255,255,255,0.86);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 700;
+      color: #46576c;
+      text-align: center;
+    }
+    .kiosk-strip-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #8a97a8; flex-shrink: 0;
+    }
+    .kiosk-strip.online  { color: #0d6e3e; }
+    .kiosk-strip.online  .kiosk-strip-dot { background: var(--green-live); }
+    .kiosk-strip.offline { color: var(--red-offline); }
+    .kiosk-strip.offline .kiosk-strip-dot { background: var(--red-offline); border-radius: 2px; }
     .tab-page.active { display: block; }
 
     /* ============================================================
@@ -1629,6 +1658,11 @@
     <!-- Scrollable page area -->
     <div class="app-content" id="app-content">
 
+      <div class="kiosk-strip" id="kiosk-strip" role="status" aria-live="polite">
+        <span class="kiosk-strip-dot" aria-hidden="true"></span>
+        <span id="kiosk-strip-text">Kiosk: checking…</span>
+      </div>
+
       <!-- ======================================================
            TAB: HOME
            ====================================================== -->
@@ -1929,7 +1963,16 @@
 
         <div class="lock-card">
           <div class="lock-card-title">Lock Now</div>
-          <div class="lock-card-desc">Require PIN to continue using the app. The app also auto-locks after 3 minutes of inactivity.</div>
+          <div class="lock-card-desc">Require PIN to continue using the app. It also locks after the time below with no taps, and when it has been in the background for more than 5 minutes.</div>
+          <div class="settings-field-group">
+            <label class="settings-label" for="lock-after-select">Auto-lock after</label>
+            <select class="settings-input" id="lock-after-select">
+              <option value="5">5 minutes</option>
+              <option value="15">15 minutes</option>
+              <option value="30">30 minutes</option>
+              <option value="60">60 minutes</option>
+            </select>
+          </div>
           <button class="btn-lock-now" onclick="lockApp()">
             Lock App
           </button>
@@ -1946,7 +1989,7 @@
           <div class="settings-save-msg" id="kiosk-cmd-msg" role="status" aria-live="polite"></div>
           <div class="lock-card-desc" style="margin-top:14px;">
             Kiosk settings. Blank / “Use kiosk file” = the value in kiosk-config.env on the PC.
-            The kiosk picks changes up within ~90 s; tap-to-pay changes restart the kiosk server when nobody is ordering.
+            The kiosk picks changes up within ~2 min; tap-to-pay changes restart the kiosk server when nobody is ordering.
             Secrets (Clover token, API keys) can never be set here.
           </div>
           <div id="kiosk-settings-fields"></div>
@@ -2136,7 +2179,11 @@ const LS_A2HS      = 'tb_a2hs_dismissed'; // whether user dismissed coachmark
 const SS_TOKEN     = 'tb_token_session';  // plaintext token in sessionStorage ONLY
 
 const MAX_PIN_ATTEMPTS = 6;
-const LOCK_AFTER_MS    = 3 * 60 * 1000;  // 3 min
+const LS_LOCK_MIN      = 'tb_lock_after_min';      // auto-lock minutes (5/15/30/60)
+const LOCK_CHOICES_MIN = [5, 15, 30, 60];
+const LOCK_DEFAULT_MIN = 15;
+const BG_LOCK_MS       = 5 * 60 * 1000;   // background longer than this = lock on return
+const LIVE_MSG         = 'Saved · live on the kiosk within ~2 min'; // kiosk polls 90 s + GitHub raw cache
 const LOCKOUT_MS       = 60 * 1000;      // 1 min cooldown
 
 // PBKDF2 params — meet Scarlett's ≥100k requirement
@@ -2342,15 +2389,36 @@ function wipeCredentials() {
 // INACTIVITY LOCK
 // ----------------------------------------------------------------
 
+function lockAfterMs() {
+  let m = NaN;
+  try { m = parseInt(localStorage.getItem(LS_LOCK_MIN), 10); } catch (_) {}
+  return (LOCK_CHOICES_MIN.includes(m) ? m : LOCK_DEFAULT_MIN) * 60 * 1000;
+}
+
 function resetInactivityTimer() {
   state.lastActivity = Date.now();
   clearInactivityTimer();
-  state.inactivityTimer = setTimeout(() => {
-    if (sessionStorage.getItem(SS_TOKEN)) {
-      lockApp();
-    }
-  }, LOCK_AFTER_MS);
+  state.inactivityTimer = setTimeout(function fire() {
+    if (!sessionStorage.getItem(SS_TOKEN)) return;
+    // Never lock with a save still on its way (it needs the token)
+    if (writesBusy()) { state.inactivityTimer = setTimeout(fire, 15_000); return; }
+    lockApp();
+  }, lockAfterMs());
 }
+
+// Background: timers do not run reliably there, so decide when the app comes back
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') { state.hiddenAt = Date.now(); return; }
+  const hiddenFor = state.hiddenAt ? Date.now() - state.hiddenAt : 0;
+  state.hiddenAt = null;
+  if (!sessionStorage.getItem(SS_TOKEN) || !$('screen-app').classList.contains('active')) return;
+  if (!writesBusy() && (hiddenFor > BG_LOCK_MS || Date.now() - state.lastActivity > lockAfterMs())) {
+    lockApp();
+  } else {
+    resetInactivityTimer();
+    pollKioskStrip();
+  }
+});
 
 function clearInactivityTimer() {
   if (state.inactivityTimer) {
@@ -2612,6 +2680,12 @@ function enterApp() {
   resetInactivityTimer();
   loadAll();
   initA2HS();
+  pollKioskStrip();
+  if (!state.kioskStripTimer) {
+    state.kioskStripTimer = setInterval(() => {
+      if (document.visibilityState === 'visible') pollKioskStrip();
+    }, 60_000);
+  }
 }
 
 // ----------------------------------------------------------------
@@ -3123,8 +3197,8 @@ async function handleToggle(drinkId) {
   try {
     await scheduleWrite(setListMember('soldOut', drinkId, willBeOut));
     if (lastToggleTicket['d:' + drinkId] !== ticket) return; // a newer tap on this row owns the status
-    setRowStatus(drinkId, 'saved', 'Saved');
-    setTimeout(() => { if (lastToggleTicket['d:' + drinkId] === ticket) setRowStatus(drinkId, '', ''); }, 2500);
+    setRowStatus(drinkId, 'saved', LIVE_MSG);
+    setTimeout(() => { if (lastToggleTicket['d:' + drinkId] === ticket) setRowStatus(drinkId, '', ''); }, 6000);
   } catch (err) {
     if (lastToggleTicket['d:' + drinkId] !== ticket) return;
     // Show what is really true now (the failed change is no longer queued)
@@ -3346,8 +3420,8 @@ async function handleAddonToggle(addonId) {
   try {
     await scheduleWrite(setListMember('soldOutOptions', addonId, willBeOut));
     if (lastToggleTicket['a:' + addonId] !== ticket) return;
-    setAddonRowStatus(addonId, 'saved', 'Saved');
-    setTimeout(() => { if (lastToggleTicket['a:' + addonId] === ticket) setAddonRowStatus(addonId, '', ''); }, 2500);
+    setAddonRowStatus(addonId, 'saved', LIVE_MSG);
+    setTimeout(() => { if (lastToggleTicket['a:' + addonId] === ticket) setAddonRowStatus(addonId, '', ''); }, 6000);
   } catch (err) {
     if (lastToggleTicket['a:' + addonId] !== ticket) return;
     flipAddonToggleUI(addonId, (controlView().soldOutOptions || []).includes(addonId));
@@ -3427,8 +3501,8 @@ $('btn-make-special').addEventListener('click', async () => {
   renderHomeQuickCards();
   try {
     await p;
-    setSpecialSaveStatus('saved', `Saved — ${sp.name} is the special`);
-    setTimeout(() => setSpecialSaveStatus('', ''), 5000);
+    setSpecialSaveStatus('saved', LIVE_MSG);
+    setTimeout(() => setSpecialSaveStatus('', ''), 8000);
   } catch (err) {
     setSpecialSaveStatus('failed', `Save failed: ${err.message}`);
   }
@@ -3453,7 +3527,7 @@ $('btn-clear-special').addEventListener('click', async () => {
         $('label-char-count').textContent = '0 / 24';
         $('btn-make-special').disabled = true;
         updateSpecialPreview();
-        setSpecialSaveStatus('saved', 'Special cleared');
+        setSpecialSaveStatus('saved', 'Cleared · gone from the kiosk within ~2 min');
         setTimeout(() => setSpecialSaveStatus('', ''), 2500);
         renderHomeQuickCards();
       } catch (err) {
@@ -4092,7 +4166,7 @@ async function labPublish() {
 
   try {
     await scheduleWrite(next);
-    labSetSaveMsg('saved', 'Published — live on kiosk within 90s');
+    labSetSaveMsg('saved', 'Published · live on the kiosk within ~2 min');
     labDrink = null;
     setTimeout(() => {
       labSetSaveMsg('', '');
@@ -4158,6 +4232,12 @@ $('lab-name-edit').addEventListener('input', e => {
 
 // Pre-fill health URL field and Anthropic key indicator
 function initSettingsTab() {
+  const sel = $('lock-after-select');
+  sel.value = String(lockAfterMs() / 60000);
+  sel.addEventListener('change', () => {
+    try { localStorage.setItem(LS_LOCK_MIN, sel.value); } catch (_) {}
+    resetInactivityTimer();
+  });
   const url = localStorage.getItem(LS_HEALTH) || '';
   $('health-url-input').value = url;
   // Show placeholder in Anthropic key field if a key is stored
@@ -4284,14 +4364,54 @@ function kioskAgo(min) {
   return `${Math.round(min / 1440)} days ago`;
 }
 
+/**
+ * GET the kiosk heartbeat. Returns { kind: 'ok', online, version, ageMin } |
+ * { kind: 'none' } (404 / no reports yet) | { kind: 'error' }.
+ */
+async function fetchKioskStatus() {
+  try {
+    const res = await fetch(KIOSK_STATUS_URL, { cache: 'no-store' });
+    if (res.status === 404) return { kind: 'none' };
+    if (!res.ok) return { kind: 'error' };
+    const d = await res.json();
+    if (!d || !d.lastSeen) return { kind: 'none' };
+    let ageMin = typeof d.ageMin === 'number' ? d.ageMin : null;
+    const t = Date.parse(d.lastSeen);
+    if (ageMin == null && !isNaN(t)) ageMin = Math.max(0, Math.round((Date.now() - t) / 60000));
+    return { kind: 'ok', online: !!d.online, version: d.version, ageMin };
+  } catch (_) { return { kind: 'error' }; }
+}
+
 async function renderKioskStatus() {
   const el = $('kiosk-remote-status');
-  try {
-    const d = await (await fetch(KIOSK_STATUS_URL, { cache: 'no-store' })).json();
-    el.textContent = d && d.lastSeen
-      ? `Kiosk: ${d.online ? 'online' : 'OFFLINE'} · v${d.version} · seen ${kioskAgo(d.ageMin)}. Details: thirstybeaches.com/trailer`
-      : 'Kiosk: no status reports yet (it starts reporting after the v24 switch-over restart).';
-  } catch (_) { el.textContent = 'Kiosk status unavailable right now.'; }
+  const st = await fetchKioskStatus();
+  renderKioskStrip(st);
+  el.textContent = st.kind === 'ok'
+    ? `Kiosk: ${st.online ? 'online' : 'OFFLINE'}${st.version ? ' · v' + st.version : ''} · seen ${kioskAgo(st.ageMin)}. Details: thirstybeaches.com/trailer`
+    : st.kind === 'none'
+      ? 'Kiosk: no status reports yet (it starts reporting after the v24 switch-over restart).'
+      : 'Kiosk status unavailable right now.';
+}
+
+/** Top-of-screen strip: kiosk online / last seen. */
+function renderKioskStrip(st) {
+  const strip = $('kiosk-strip'), text = $('kiosk-strip-text');
+  strip.classList.toggle('online', st.kind === 'ok' && st.online);
+  strip.classList.toggle('offline', st.kind === 'ok' && !st.online);
+  if (st.kind === 'ok') {
+    text.textContent = st.online
+      ? `Kiosk online · seen ${kioskAgo(st.ageMin)}${st.version ? ' · v' + st.version : ''}`
+      : `Kiosk OFFLINE · last seen ${kioskAgo(st.ageMin)}`;
+  } else if (st.kind === 'none') {
+    text.textContent = 'Kiosk status: not set up yet';
+  } else {
+    text.textContent = 'Kiosk status unavailable';
+  }
+}
+
+async function pollKioskStrip() {
+  if (!sessionStorage.getItem(SS_TOKEN)) return;
+  renderKioskStrip(await fetchKioskStatus());
 }
 
 function renderKioskSettingsForm() {
@@ -4356,7 +4476,7 @@ async function sendKioskCommand(name, okText) {
   catch (err) { msg.textContent = `Failed: ${err.message}`; }
   setTimeout(() => { msg.textContent = ''; }, 6000);
 }
-$('btn-kiosk-update').addEventListener('click', () => sendKioskCommand('checkUpdateAt', 'Sent — the kiosk checks for an update within ~90 s'));
+$('btn-kiosk-update').addEventListener('click', () => sendKioskCommand('checkUpdateAt', 'Sent · the kiosk checks for an update within ~2 min'));
 $('btn-kiosk-reload').addEventListener('click', () => sendKioskCommand('reloadScreenAt', 'Sent — the screen reloads the next time nobody is using it'));
 $('btn-kiosk-restart').addEventListener('click', () => {
   if (!confirm('Restart the kiosk server? It waits until nobody is ordering, and is back in a few seconds.')) return;
@@ -4373,7 +4493,7 @@ $('btn-kiosk-settings-save').addEventListener('click', async () => {
   msg.textContent = 'Saving…';
   try {
     await scheduleWrite(c => ({ ...c, settings }));
-    msg.textContent = Object.keys(settings).length ? 'Saved — the kiosk applies it within ~90 s' : 'Saved — the kiosk uses kiosk-config.env only';
+    msg.textContent = Object.keys(settings).length ? 'Saved · the kiosk applies it within ~2 min' : 'Saved · the kiosk uses kiosk-config.env only (within ~2 min)';
   } catch (err) { msg.textContent = `Save failed: ${err.message}`; }
   setTimeout(() => { msg.textContent = ''; }, 6000);
 });
