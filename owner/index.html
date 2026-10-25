@@ -23,6 +23,7 @@
       --bg-sand-deep:   #ffe7cc;
       --ink:            #163a5f;
       --ink-soft:       #5a6c82;
+      --ink-muted:      #46576c;  /* secondary text: >=6:1 on white, >=5:1 on sand */
       --panel:          rgba(255,255,255,0.72);
       --panel-solid:    rgba(255,255,255,0.92);
       --border:         rgba(22,58,95,0.14);
@@ -340,12 +341,41 @@
       padding-bottom: calc(80px + env(safe-area-inset-bottom));
     }
 
-    /* Individual tab pages */
+    /* Individual tab pages (the kiosk strip above carries the safe-area inset) */
     .tab-page {
       display: none;
       padding: 16px;
-      padding-top: calc(env(safe-area-inset-top, 0px) + 16px);
+      padding-top: 12px;
     }
+
+    /* Kiosk status strip (top of every tab) */
+    .kiosk-strip {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 32px;
+      padding: calc(env(safe-area-inset-top, 0px) + 6px) 16px 6px;
+      background: rgba(255,255,255,0.86);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 700;
+      color: #46576c;
+      text-align: center;
+    }
+    .kiosk-strip-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #8a97a8; flex-shrink: 0;
+    }
+    .kiosk-strip.online  { color: #0d6e3e; }
+    .kiosk-strip.online  .kiosk-strip-dot { background: var(--green-live); }
+    .kiosk-strip.offline { color: var(--red-offline); }
+    .kiosk-strip.offline .kiosk-strip-dot { background: var(--red-offline); border-radius: 2px; }
     .tab-page.active { display: block; }
 
     /* ============================================================
@@ -379,10 +409,10 @@
       justify-content: center;
       gap: 4px;
       position: relative;
-      color: var(--ink-soft);
-      font-size: 11px;
+      color: var(--ink-muted);
+      font-size: 13px;
       font-weight: 700;
-      letter-spacing: 0.02em;
+      letter-spacing: 0;
       -webkit-tap-highlight-color: transparent;
       transition: color 0.15s;
     }
@@ -444,6 +474,75 @@
     }
 
     /* Health banner */
+    /* Home: one-tap sold-out list */
+    .so-quick {
+      background: var(--panel-solid);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 14px 14px 12px;
+      margin-bottom: 16px;
+    }
+    .so-quick-head {
+      display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+      margin-bottom: 10px;
+    }
+    .so-quick-title { font-size: 16px; font-weight: 800; color: var(--ink); }
+    .so-quick-hint { font-size: 13px; color: #46576c; }
+    .so-quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .so-chip {
+      min-height: 52px;
+      padding: 6px 12px;
+      border-radius: 14px;
+      border: 1.5px solid var(--border-strong);
+      background: #fff;
+      color: var(--ink);
+      text-align: left;
+      display: flex; flex-direction: column; justify-content: center;
+      min-width: 0;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.1s, background 0.15s;
+    }
+    .so-chip:active { transform: scale(0.97); }
+    .so-chip-name {
+      font-size: 15px; font-weight: 800; line-height: 1.2;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .so-chip-sub { font-size: 13px; font-weight: 700; color: #46576c; line-height: 1.2; }
+    .so-chip[aria-pressed="true"] {
+      background: var(--red-offline); border-color: var(--red-offline); color: #fff;
+    }
+    .so-chip[aria-pressed="true"] .so-chip-sub { color: #fff; }
+    .so-chip.saving .so-chip-sub::after { content: ' · saving…'; }
+    .so-quick-more {
+      margin-top: 10px; width: 100%; min-height: 44px;
+      border-radius: var(--radius-pill);
+      border: 1.5px solid var(--border-strong);
+      background: transparent; color: var(--ink); font-size: 14px; font-weight: 800;
+    }
+
+    /* Undo toast */
+    .toast {
+      position: fixed;
+      left: 50%; transform: translateX(-50%);
+      bottom: calc(76px + env(safe-area-inset-bottom));
+      width: calc(100% - 24px); max-width: 406px;
+      background: var(--ink); color: #fff;
+      border-radius: 16px;
+      padding: 8px 8px 8px 16px;
+      display: none; align-items: center; gap: 10px;
+      box-shadow: 0 8px 24px rgba(22,58,95,0.28);
+      z-index: 150;
+      font-size: 14px; font-weight: 700; line-height: 1.3;
+    }
+    .toast.visible { display: flex; }
+    .toast-text { flex: 1; min-width: 0; }
+    .toast-text small { display: block; font-size: 13px; font-weight: 600; color: #d3deea; }
+    .toast-btn {
+      min-width: 72px; min-height: 44px; padding: 0 14px;
+      border-radius: 12px; background: rgba(255,255,255,0.16);
+      color: #fff; font-size: 15px; font-weight: 800;
+    }
+
     .health-banner {
       border-radius: var(--radius-card);
       padding: 20px 20px 18px;
@@ -454,7 +553,7 @@
       transition: background 0.3s;
     }
     .health-banner.live {
-      background: var(--green-live);
+      background: #0f7f48; /* white text 5.0:1 */
     }
     .health-banner.offline-status {
       background: var(--red-offline);
@@ -485,8 +584,8 @@
       font-weight: 800;
     }
     .health-banner-detail {
-      font-size: 12px;
-      opacity: 0.85;
+      font-size: 13px;
+      opacity: 1;
       margin-top: 2px;
     }
 
@@ -533,8 +632,8 @@
       color: var(--ink);
       line-height: 1;
     }
-    .quick-card-value.accent-coral { color: var(--coral); }
-    .quick-card-value.accent-magenta { color: var(--magenta); }
+    .quick-card-value.accent-coral { color: #a8470a; }   /* coral family, 5.4:1 on white */
+    .quick-card-value.accent-magenta { color: #c0136a; } /* magenta family, 5.5:1 on white */
 
     /* ============================================================
        SOLD-OUT TAB
@@ -590,11 +689,11 @@
       align-items: center;
       gap: 8px;
       padding: 6px 4px;
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 800;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: var(--ink-soft);
+      color: var(--ink-muted);
       margin-bottom: 4px;
     }
     .category-dot {
@@ -619,8 +718,8 @@
       position: relative;
     }
     .drink-row.sold-out {
-      opacity: 0.72;
-      background: rgba(196,43,72,0.05);
+      background: #fdf0f1;
+      border-color: rgba(196,43,72,0.30);
     }
 
     .drink-row-info {
@@ -639,9 +738,9 @@
       display: inline-block;
       background: var(--red-offline);
       color: white;
-      font-size: 9px;
+      font-size: 13px;
       font-weight: 800;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.03em;
       text-transform: uppercase;
       border-radius: var(--radius-pill);
       padding: 2px 7px;
@@ -649,13 +748,16 @@
       vertical-align: middle;
     }
     .drink-row-status {
-      font-size: 11px;
-      color: var(--ink-soft);
+      font-size: 13px;
+      color: var(--ink-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       margin-top: 2px;
       min-height: 16px;
     }
-    .drink-row-status.saving  { color: var(--coral); }
-    .drink-row-status.saved   { color: var(--green-live); }
+    .drink-row-status.saving  { color: #a8470a; }
+    .drink-row-status.saved   { color: #0d6e3e; }
     .drink-row-status.failed  { color: var(--red-offline); cursor: pointer; text-decoration: underline; }
 
     /* Toggle switch */
@@ -707,10 +809,11 @@
       justify-content: flex-end;
     }
     .btn-clear-all {
-      font-size: 12px;
+      font-size: 13px;
+      min-height: 44px;
       color: var(--red-offline);
       font-weight: 700;
-      padding: 8px 12px;
+      padding: 8px 14px;
       border-radius: var(--radius-pill);
       border: 1.5px solid rgba(196,43,72,0.25);
       background: rgba(196,43,72,0.06);
@@ -732,11 +835,11 @@
     }
     .seg-btn {
       flex: 1;
-      height: 36px;
+      min-height: 44px;
       border-radius: calc(var(--radius-pill) - 2px);
-      font-size: 13px;
+      font-size: 15px;
       font-weight: 800;
-      color: var(--ink-soft);
+      color: var(--ink-muted);
       letter-spacing: 0.02em;
       transition: background 0.15s, color 0.15s, box-shadow 0.15s;
       -webkit-tap-highlight-color: transparent;
@@ -749,11 +852,11 @@
 
     /* Category label for add-on groups */
     .addon-group-label {
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 800;
-      letter-spacing: 0.07em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: var(--ink-soft);
+      color: var(--ink-muted);
       padding: 14px 0 6px;
     }
     .addon-group-label:first-child { padding-top: 0; }
@@ -1194,6 +1297,25 @@
       min-height: 18px;
     }
 
+    /* "On the kiosk now" (Daily Special tab) */
+    .special-live-row {
+      display: flex; flex-direction: column; gap: 2px;
+      padding: 12px 14px; border-radius: 14px;
+      background: rgba(17,138,78,0.07); border: 1.5px solid rgba(17,138,78,0.28);
+      margin-bottom: 8px;
+    }
+    .special-live-row:last-child { margin-bottom: 0; }
+    .special-live-tag { font-size: 13px; font-weight: 800; color: var(--green-live); }
+    .special-live-name { font-size: 17px; font-weight: 800; color: var(--ink); }
+    .special-live-src { font-size: 13px; color: #46576c; }
+    .special-live-none { font-size: 14px; color: #46576c; }
+    .special-legacy-warn {
+      margin-top: 10px; padding: 10px 12px; border-radius: 12px;
+      background: rgba(255,138,43,0.10); border: 1.5px solid rgba(255,138,43,0.45);
+      font-size: 14px; color: var(--ink); line-height: 1.4;
+    }
+    .special-replace-note { font-size: 13px; color: #46576c; margin-top: 10px; }
+
     /* Current specials summary in Lab */
     .lab-specials-list {
       display: flex;
@@ -1610,6 +1732,11 @@
     <!-- Scrollable page area -->
     <div class="app-content" id="app-content">
 
+      <div class="kiosk-strip" id="kiosk-strip" role="status" aria-live="polite">
+        <span class="kiosk-strip-dot" aria-hidden="true"></span>
+        <span id="kiosk-strip-text">Kiosk: checking…</span>
+      </div>
+
       <!-- ======================================================
            TAB: HOME
            ====================================================== -->
@@ -1620,6 +1747,19 @@
           <h1>Thirsty Beaches</h1>
           <p id="home-subtitle">Owner Control Panel</p>
         </div>
+
+        <!-- One-tap sold-out list (current sold-out, recently toggled, most used) -->
+        <section class="so-quick" id="so-quick" aria-labelledby="so-quick-title">
+          <div class="so-quick-head">
+            <h2 class="so-quick-title" id="so-quick-title">Sold out — one tap</h2>
+            <span class="so-quick-hint">Tap again to bring back</span>
+          </div>
+          <div class="so-quick-grid" id="so-quick-grid">
+            <div class="skeleton skeleton-row" style="height:52px"></div>
+            <div class="skeleton skeleton-row" style="height:52px"></div>
+          </div>
+          <button class="so-quick-more" id="so-quick-more" type="button">Find another item…</button>
+        </section>
 
         <!-- Health banner -->
         <div class="health-banner unknown" id="health-banner"
@@ -1680,7 +1820,7 @@
 
         </div><!-- /.quick-grid -->
 
-        <p style="font-size:11px;color:var(--ink-soft);text-align:center;margin-top:8px;" id="last-sync-line">
+        <p style="font-size:13px;color:var(--ink-muted);text-align:center;margin-top:8px;" id="last-sync-line">
           Last sync: —
         </p>
 
@@ -1768,6 +1908,14 @@
           <p>Set a featured drink that shows on the kiosk</p>
         </div>
 
+        <!-- What the kiosk shows right now (specials[] in kiosk-control.json) -->
+        <div class="special-card" id="special-live-card">
+          <div class="special-card-title">On the kiosk now</div>
+          <div id="special-live-area" role="status" aria-live="polite">
+            <div class="special-live-none">Loading…</div>
+          </div>
+        </div>
+
         <!-- Live preview -->
         <div class="special-card">
           <div class="special-card-title">Preview</div>
@@ -1805,6 +1953,7 @@
             <button class="btn-clear-special" id="btn-clear-special">Clear</button>
           </div>
 
+          <p class="special-replace-note">One featured special at a time: this replaces whatever is on the kiosk now (including a Drink Lab special).</p>
           <p class="save-status-msg" id="special-save-status" role="status" aria-live="polite"></p>
         </div>
 
@@ -1901,10 +2050,38 @@
 
         <div class="lock-card">
           <div class="lock-card-title">Lock Now</div>
-          <div class="lock-card-desc">Require PIN to continue using the app. The app also auto-locks after 3 minutes of inactivity.</div>
+          <div class="lock-card-desc">Require PIN to continue using the app. It also locks after the time below with no taps, and when it has been in the background for more than 5 minutes.</div>
+          <div class="settings-field-group">
+            <label class="settings-label" for="lock-after-select">Auto-lock after</label>
+            <select class="settings-input" id="lock-after-select">
+              <option value="5">5 minutes</option>
+              <option value="15">15 minutes</option>
+              <option value="30">30 minutes</option>
+              <option value="60">60 minutes</option>
+            </select>
+          </div>
           <button class="btn-lock-now" onclick="lockApp()">
             Lock App
           </button>
+        </div>
+
+        <div class="lock-card" id="kiosk-remote-card">
+          <div class="lock-card-title">Kiosk (remote control)</div>
+          <div class="lock-card-desc" id="kiosk-remote-status">Checking kiosk status…</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <button class="btn-secondary" id="btn-kiosk-update" type="button">Check for update now</button>
+            <button class="btn-secondary" id="btn-kiosk-reload" type="button">Reload screen</button>
+            <button class="btn-secondary" id="btn-kiosk-restart" type="button">Restart kiosk server</button>
+          </div>
+          <div class="settings-save-msg" id="kiosk-cmd-msg" role="status" aria-live="polite"></div>
+          <div class="lock-card-desc" style="margin-top:14px;">
+            Kiosk settings. Blank / “Use kiosk file” = the value in kiosk-config.env on the PC.
+            The kiosk picks changes up within ~2 min; tap-to-pay changes restart the kiosk server when nobody is ordering.
+            Secrets (Clover token, API keys) can never be set here.
+          </div>
+          <div id="kiosk-settings-fields"></div>
+          <button class="btn-secondary" id="btn-kiosk-settings-save" type="button" style="margin-top:4px;">Save kiosk settings</button>
+          <div class="settings-save-msg" id="kiosk-settings-msg" role="status" aria-live="polite"></div>
         </div>
 
         <div class="lock-card">
@@ -2047,6 +2224,12 @@
   </div>
 
 
+  <!-- Undo toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <div class="toast-text" id="toast-text"></div>
+    <button class="toast-btn" id="toast-btn" type="button">Undo</button>
+  </div>
+
   <!-- ============================================================
        A2HS COACHMARK (iOS Safari)
        ============================================================ -->
@@ -2089,7 +2272,11 @@ const LS_A2HS      = 'tb_a2hs_dismissed'; // whether user dismissed coachmark
 const SS_TOKEN     = 'tb_token_session';  // plaintext token in sessionStorage ONLY
 
 const MAX_PIN_ATTEMPTS = 6;
-const LOCK_AFTER_MS    = 3 * 60 * 1000;  // 3 min
+const LS_LOCK_MIN      = 'tb_lock_after_min';      // auto-lock minutes (5/15/30/60)
+const LOCK_CHOICES_MIN = [5, 15, 30, 60];
+const LOCK_DEFAULT_MIN = 15;
+const BG_LOCK_MS       = 5 * 60 * 1000;   // background longer than this = lock on return
+const LIVE_MSG         = 'Saved · live on the kiosk within ~2 min'; // kiosk polls 90 s + GitHub raw cache
 const LOCKOUT_MS       = 60 * 1000;      // 1 min cooldown
 
 // PBKDF2 params — meet Scarlett's ≥100k requirement
@@ -2116,7 +2303,8 @@ let state = {
   lastActivity: Date.now(),
   inactivityTimer: null,
   writeDebounceTimer: null,
-  pendingControlState: null, // coalesced write target
+  writeQueue: [],       // queued change functions [{fn, resolve, reject}]
+  writeInflight: null,  // batch currently being PUT
   specialDrinkId: null,
   specialDrinkName: null,
   healthCheckInterval: null,
@@ -2294,15 +2482,36 @@ function wipeCredentials() {
 // INACTIVITY LOCK
 // ----------------------------------------------------------------
 
+function lockAfterMs() {
+  let m = NaN;
+  try { m = parseInt(localStorage.getItem(LS_LOCK_MIN), 10); } catch (_) {}
+  return (LOCK_CHOICES_MIN.includes(m) ? m : LOCK_DEFAULT_MIN) * 60 * 1000;
+}
+
 function resetInactivityTimer() {
   state.lastActivity = Date.now();
   clearInactivityTimer();
-  state.inactivityTimer = setTimeout(() => {
-    if (sessionStorage.getItem(SS_TOKEN)) {
-      lockApp();
-    }
-  }, LOCK_AFTER_MS);
+  state.inactivityTimer = setTimeout(function fire() {
+    if (!sessionStorage.getItem(SS_TOKEN)) return;
+    // Never lock with a save still on its way (it needs the token)
+    if (writesBusy()) { state.inactivityTimer = setTimeout(fire, 15_000); return; }
+    lockApp();
+  }, lockAfterMs());
 }
+
+// Background: timers do not run reliably there, so decide when the app comes back
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') { state.hiddenAt = Date.now(); return; }
+  const hiddenFor = state.hiddenAt ? Date.now() - state.hiddenAt : 0;
+  state.hiddenAt = null;
+  if (!sessionStorage.getItem(SS_TOKEN) || !$('screen-app').classList.contains('active')) return;
+  if (!writesBusy() && (hiddenFor > BG_LOCK_MS || Date.now() - state.lastActivity > lockAfterMs())) {
+    lockApp();
+  } else {
+    resetInactivityTimer();
+    pollKioskStrip();
+  }
+});
 
 function clearInactivityTimer() {
   if (state.inactivityTimer) {
@@ -2549,6 +2758,10 @@ function switchTab(name) {
     else if (state.drinks.length > 0) renderDrinkList();
   }
 
+  if (name === 'lock') renderKioskCard();
+  if (name === 'special') renderSpecialLive();
+  if (name === 'home' && state.control) { buildQuickList(); renderQuickList(); }
+
   // Refresh lab key gate and live specials when entering Drink Lab
   if (name === 'lab') {
     labRefreshKeyGate();
@@ -2561,6 +2774,12 @@ function enterApp() {
   resetInactivityTimer();
   loadAll();
   initA2HS();
+  pollKioskStrip();
+  if (!state.kioskStripTimer) {
+    state.kioskStripTimer = setInterval(() => {
+      if (document.visibilityState === 'visible') pollKioskStrip();
+    }, 60_000);
+  }
 }
 
 // ----------------------------------------------------------------
@@ -2644,40 +2863,54 @@ async function loadAddons() {
 }
 
 /**
- * Load kiosk-control.json via raw GitHub (no auth needed for reads).
- * Also fetches the blob SHA from the contents API for write operations.
+ * Load kiosk-control.json. Prefers the contents API (content + sha from the
+ * same response, so a later PUT can never be based on a stale raw-CDN copy);
+ * falls back to raw.githubusercontent.com for display if the API is unreachable.
+ * While a write is queued or in flight the server copy is not touched here —
+ * the write loop owns it until the queue drains.
  */
 async function loadControl() {
+  if (writesBusy()) { updateLastSync(); return; }
   try {
-    // Fetch the JSON content for display
-    const rawRes = await fetch(`${RAW_BASE}/kiosk-control.json?t=${Date.now()}`);
+    const remote = await fetchRemoteControl();
+    if (writesBusy()) return;
+    state.control = remote.control;
+    state.controlSha = remote.sha;
+    updateLastSync();
+    return;
+  } catch (_) { /* fall back to raw for display */ }
+  try {
+    const rawRes = await fetch(`${RAW_BASE}/kiosk-control.json?t=${Date.now()}`, { cache: 'no-store' });
     if (!rawRes.ok) throw new Error(`HTTP ${rawRes.status}`);
     const data = await rawRes.json();
+    if (writesBusy()) return;
     state.control = data;
-
-    // Fetch the SHA we'll need for writes (uses auth if available, else anonymous)
-    await refreshControlSha();
+    state.controlSha = null; // unknown: the first write re-reads it from the API
     updateLastSync();
   } catch (err) {
     showErrorBanner(`Could not load control data: ${err.message}`);
   }
 }
 
-/** GET the contents API to refresh the SHA only (needed before every write). */
+/** GET the contents API: returns { control, sha }. Throws on failure. */
+async function fetchRemoteControl() {
+  const headers = { 'Accept': 'application/vnd.github.v3+json' };
+  let token = null;
+  try { token = getSessionToken(); } catch (_) {}
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(`${API_BASE}/kiosk-control.json?t=${Date.now()}`, { headers, cache: 'no-store' });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const meta = await res.json();
+  const control = JSON.parse(base64DecodeUtf8(String(meta.content || '').replace(/\s/g, '')));
+  return { control, sha: meta.sha };
+}
+
+/** Back-compat: refresh just the sha (and content) when idle. */
 async function refreshControlSha() {
   try {
-    const headers = { 'Accept': 'application/vnd.github.v3+json' };
-    let token = null;
-    try { token = getSessionToken(); } catch (_) {}
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-
-    const res = await fetch(`${API_BASE}/kiosk-control.json`, { headers });
-    if (!res.ok) return; // sha stays null; will cause write failure handled downstream
-    const meta = await res.json();
-    state.controlSha = meta.sha;
-  } catch (_) {
-    // not fatal for reads
-  }
+    const remote = await fetchRemoteControl();
+    if (!writesBusy()) { state.control = remote.control; state.controlSha = remote.sha; }
+  } catch (_) { /* not fatal for reads */ }
 }
 
 function updateLastSync() {
@@ -2686,49 +2919,76 @@ function updateLastSync() {
 }
 
 // ----------------------------------------------------------------
-// GITHUB WRITE (read-modify-write with SHA, debounced)
+// GITHUB WRITE (serialized queue of intended changes)
 // ----------------------------------------------------------------
+//
+// Callers describe WHAT they want changed (a function control -> control),
+// not a whole new file. Changes queue up, are batched after a short pause,
+// and exactly one PUT is in flight at a time. If GitHub says the sha is stale
+// (409, or 422 sha mismatch) the file is re-read and the same changes are
+// re-applied on top of it, so neither a rapid second tap nor an edit made
+// elsewhere is lost. A caller's promise resolves only after the PUT that
+// contains its change has succeeded.
+//
+// state.control  = last copy confirmed on GitHub
+// controlView()  = state.control with every queued/in-flight change applied
+//                  (what the UI shows)
 
-/**
- * Write a new control object with debounce + coalescing.
- *
- * Rapid callers (e.g. flurry of toggle taps) share one debounced network
- * write. All pending callers are resolved or rejected together when the
- * single write completes. The written payload is always the LATEST state
- * passed in, not one payload per tap.
- *
- * Returns a promise that resolves/rejects when the coalesced write settles.
- */
-function scheduleWrite(newControl) {
-  // Always record the latest desired state
-  state.pendingControlState = { ...newControl, updated: new Date().toISOString() };
+const WRITE_DEBOUNCE_MS = 500;
+const WRITE_MAX_ATTEMPTS = 4;
 
-  // Add this caller to the shared waitlist
-  const p = new Promise((resolve, reject) => {
-    state.pendingWriteCallbacks = state.pendingWriteCallbacks || [];
-    state.pendingWriteCallbacks.push({ resolve, reject });
-  });
-
-  // Reset (or start) the debounce timer
-  if (state.writeDebounceTimer) {
-    clearTimeout(state.writeDebounceTimer);
-  }
-  state.writeDebounceTimer = setTimeout(async () => {
-    const callbacks = state.pendingWriteCallbacks || [];
-    state.pendingWriteCallbacks = [];
-    state.writeDebounceTimer = null;
-    try {
-      await commitControlWrite(state.pendingControlState);
-      callbacks.forEach(cb => cb.resolve());
-    } catch (err) {
-      callbacks.forEach(cb => cb.reject(err));
-    }
-  }, 600);
-
-  return p;
+function writesBusy() {
+  return !!(state.writeInflight || (state.writeQueue && state.writeQueue.length));
 }
 
-async function commitControlWrite(controlObj) {
+function controlView() {
+  let c = state.control || {};
+  for (const e of (state.writeInflight || [])) c = e.fn(c);
+  for (const e of (state.writeQueue || [])) c = e.fn(c);
+  return c;
+}
+
+/**
+ * Queue a change. `change` is a function (control -> new control); a plain
+ * object is accepted for back-compat and is merged as top-level fields.
+ * Returns a promise that settles when the change has landed on GitHub.
+ */
+function scheduleWrite(change) {
+  const fn = typeof change === 'function' ? change : (c => ({ ...c, ...change }));
+  return new Promise((resolve, reject) => {
+    state.writeQueue = state.writeQueue || [];
+    state.writeQueue.push({ fn, resolve, reject });
+    if (!state.writeInflight) {
+      if (state.writeDebounceTimer) clearTimeout(state.writeDebounceTimer);
+      state.writeDebounceTimer = setTimeout(flushWrites, WRITE_DEBOUNCE_MS);
+    }
+  });
+}
+
+async function flushWrites() {
+  state.writeDebounceTimer = null;
+  if (state.writeInflight || !state.writeQueue || !state.writeQueue.length) return;
+  const batch = state.writeQueue.splice(0);
+  state.writeInflight = batch;
+  try {
+    await commitControlWrite(batch.map(e => e.fn));
+    batch.forEach(e => e.resolve());
+  } catch (err) {
+    batch.forEach(e => e.reject(err));
+  } finally {
+    state.writeInflight = null;
+    if (state.writeQueue.length) {
+      state.writeDebounceTimer = setTimeout(flushWrites, 80);
+    }
+  }
+}
+
+/**
+ * PUT the file with `fns` applied on top of the current GitHub copy.
+ * Accepts a list of change functions (or, for back-compat, a whole object).
+ */
+async function commitControlWrite(fns) {
+  if (!Array.isArray(fns)) { const obj = fns; fns = [() => obj]; }
   if (!navigator.onLine) throw new Error('Offline');
 
   let token;
@@ -2741,46 +3001,44 @@ async function commitControlWrite(controlObj) {
     'Content-Type': 'application/json',
   };
 
-  // Ensure we have a fresh SHA
-  if (!state.controlSha) await refreshControlSha();
-  if (!state.controlSha) throw new Error('Cannot obtain file SHA — try refreshing');
+  for (let attempt = 0; attempt < WRITE_MAX_ATTEMPTS; attempt++) {
+    if (attempt > 0 || !state.controlSha || !state.control) {
+      // (Re-)read the real file + sha so the changes apply to what is on GitHub now
+      const remote = await fetchRemoteControl().catch(err => { throw new Error(`Could not read current file (${err.message})`); });
+      state.control = remote.control;
+      state.controlSha = remote.sha;
+    }
+    let target = state.control || {};
+    for (const fn of fns) target = fn(target);
+    target = { ...target, updated: new Date().toISOString() };
 
-  const body = JSON.stringify({
-    message: `control: update kiosk state [owner app]`,
-    content: base64EncodeUtf8(JSON.stringify(controlObj, null, 2)),
-    sha: state.controlSha,
-  });
-
-  let res = await fetch(`${API_BASE}/kiosk-control.json`, {
-    method: 'PUT', headers, body
-  });
-
-  // 409 = SHA conflict — get fresh SHA and retry once
-  if (res.status === 409) {
-    await refreshControlSha();
-    const retryBody = JSON.stringify({
-      message: `control: update kiosk state [owner app]`,
-      content: base64EncodeUtf8(JSON.stringify(controlObj, null, 2)),
-      sha: state.controlSha,
+    const res = await fetch(`${API_BASE}/kiosk-control.json`, {
+      method: 'PUT', headers, cache: 'no-store',
+      body: JSON.stringify({
+        message: `control: update kiosk state [owner app]`,
+        content: base64EncodeUtf8(JSON.stringify(target, null, 2)),
+        sha: state.controlSha,
+      }),
     });
-    res = await fetch(`${API_BASE}/kiosk-control.json`, {
-      method: 'PUT', headers, body: retryBody
-    });
-  }
 
-  if (!res.ok) {
-    const txt = await res.text().catch(() => res.status);
+    if (res.ok) {
+      const result = await res.json().catch(() => ({}));
+      state.controlSha = result.content?.sha || null;
+      state.control    = target;
+      state.lastWriteAt = Date.now();
+      updateLastSync();
+      return target;
+    }
+
+    const txt = await res.text().catch(() => '');
+    const shaConflict = res.status === 409 || (res.status === 422 && /sha/i.test(txt));
+    if (shaConflict) continue; // someone else (or an earlier tab) changed it: re-read and re-apply
     if (res.status === 401 || res.status === 403) throw new Error('Auth failed — check your token');
     if (res.status === 404) throw new Error('Repo/file not found — check token scope');
-    if (res.status === 422) throw new Error('Validation error (422) — SHA mismatch, try refreshing');
+    if (res.status === 422) throw new Error('Validation error (422)');
     throw new Error(`Write failed: HTTP ${res.status}`);
   }
-
-  // Update local state
-  const result = await res.json();
-  state.controlSha = result.content?.sha;
-  state.control    = controlObj;
-  updateLastSync();
+  throw new Error('The file kept changing on GitHub — tap to retry');
 }
 
 // ----------------------------------------------------------------
@@ -2816,23 +3074,27 @@ function showErrorBanner(msg) {
 
 function renderHomeQuickCards() {
   if (!state.control) return;
+  const view = controlView();
 
   // Sold-out count (drinks + add-ons combined)
-  const drinkCount  = (state.control.soldOut || []).length;
-  const addonCount  = (state.control.soldOutOptions || []).length;
+  const drinkCount  = (view.soldOut || []).length;
+  const addonCount  = (view.soldOutOptions || []).length;
   const totalCount  = drinkCount + addonCount;
   $('qc-soldout-count').textContent = totalCount === 0 ? 'None' : totalCount;
 
   // Special (prefer specials[] array; fall back to legacy special field)
-  const specials = Array.isArray(state.control.specials) ? state.control.specials : [];
-  const sp = state.control.special;
+  const specials = Array.isArray(view.specials) ? view.specials : [];
   if (specials.length) {
     $('qc-special-val').textContent = specials.length === 1
       ? truncate(specials[0].name, 10)
       : `${specials.length} live`;
   } else {
-    $('qc-special-val').textContent = sp ? truncate(sp.title || sp.drinkId, 10) : 'None';
+    // A legacy-only `special` is not shown by the kiosk, so it is not "live"
+    $('qc-special-val').textContent = 'None';
   }
+  renderSpecialLive();
+  if (state.activeTab === 'home' || !state.quickList) buildQuickList();
+  renderQuickList();
 
   updateLastSync();
 }
@@ -2917,7 +3179,7 @@ function renderDrinkList(filter = '') {
   const container = $('drink-list-container');
   if (!state.drinks.length) return;
 
-  const soldOut = new Set(state.control?.soldOut || []);
+  const soldOut = new Set(controlView().soldOut || []);
   const q = filter.toLowerCase().trim();
 
   // Group by category
@@ -2996,9 +3258,23 @@ function buildDrinkRow(drink, isSoldOut) {
     </div>`;
 }
 
+/** Change function: put `id` in (or take it out of) the list field `key`. */
+function setListMember(key, id, on) {
+  return c => {
+    const set = new Set(Array.isArray(c[key]) ? c[key] : []);
+    if (on) set.add(id); else set.delete(id);
+    return { ...c, [key]: Array.from(set) };
+  };
+}
+
+let toggleSeq = 0;
+const lastToggleTicket = {};
+
 /**
- * Handle toggle tap with optimistic flip + per-row status chip.
- * Coalesces rapid taps for the same drink into a single write.
+ * Handle toggle tap: flip the row at once, queue the change, and show
+ * "Saved" only when the PUT carrying it has landed on GitHub.
+ * The intended value is computed from controlView() (which includes changes
+ * still waiting to be written), so rapid taps on different rows all land.
  */
 async function handleToggle(drinkId) {
   if (!navigator.onLine) {
@@ -3006,41 +3282,40 @@ async function handleToggle(drinkId) {
     return;
   }
 
-  // Optimistic flip
-  const soldOut = new Set(state.control?.soldOut || []);
-  const wasOut = soldOut.has(drinkId);
-  if (wasOut) soldOut.delete(drinkId); else soldOut.add(drinkId);
+  const willBeOut = !(controlView().soldOut || []).includes(drinkId);
+  const ticket = ++toggleSeq;
+  lastToggleTicket['d:' + drinkId] = ticket;
+  recordQuickUse('d', drinkId);
 
-  // Update optimistic UI
-  flipToggleUI(drinkId, !wasOut);
+  flipToggleUI(drinkId, willBeOut);
   setRowStatus(drinkId, 'saving', 'Saving…');
-
-  // Build new control state (preserve special)
-  const newControl = {
-    ...state.control,
-    soldOut: Array.from(soldOut),
-  };
+  refreshSoldOutCounts();
 
   try {
-    await scheduleWrite(newControl);
-    setRowStatus(drinkId, 'saved', 'Saved');
-    setTimeout(() => setRowStatus(drinkId, '', ''), 2500);
-    // Update quick card
-    $('qc-soldout-count').textContent = soldOut.size || 'None';
-    $('clear-all-row').style.display = soldOut.size > 0 ? 'flex' : 'none';
+    await scheduleWrite(setListMember('soldOut', drinkId, willBeOut));
+    if (lastToggleTicket['d:' + drinkId] !== ticket) return; // a newer tap on this row owns the status
+    setRowStatus(drinkId, 'saved', LIVE_MSG);
+    setTimeout(() => { if (lastToggleTicket['d:' + drinkId] === ticket) setRowStatus(drinkId, '', ''); }, 6000);
   } catch (err) {
-    // Rollback
-    flipToggleUI(drinkId, wasOut);
-    // Re-sync local state to rolled-back value
-    if (wasOut) soldOut.add(drinkId); else soldOut.delete(drinkId);
-    state.control = { ...state.control, soldOut: Array.from(soldOut) };
+    if (lastToggleTicket['d:' + drinkId] !== ticket) return;
+    // Show what is really true now (the failed change is no longer queued)
+    flipToggleUI(drinkId, (controlView().soldOut || []).includes(drinkId));
     setRowStatus(drinkId, 'failed', `Didn't save — tap to retry`);
-    // Wire retry
     const statusEl = $(`status-${drinkId}`);
-    if (statusEl) {
-      statusEl.onclick = () => handleToggle(drinkId);
-    }
+    if (statusEl) statusEl.onclick = () => handleToggle(drinkId);
+  } finally {
+    refreshSoldOutCounts();
   }
+}
+
+/** Quick-card count + clear-all visibility from the current view. */
+function refreshSoldOutCounts() {
+  const view = controlView();
+  const d = (view.soldOut || []).length, a = (view.soldOutOptions || []).length;
+  $('qc-soldout-count').textContent = (d + a) || 'None';
+  $('clear-all-row').style.display = d > 0 ? 'flex' : 'none';
+  $('clear-all-addons-row').style.display = a > 0 ? 'flex' : 'none';
+  renderQuickList();
 }
 
 function flipToggleUI(drinkId, isSoldOut) {
@@ -3087,13 +3362,14 @@ $('btn-clear-all').addEventListener('click', () => {
     'Clear All Sold Out',
     'This will mark all drinks as available on the kiosk.',
     async () => {
-      const newControl = { ...state.control, soldOut: [] };
+      const p = scheduleWrite(c => ({ ...c, soldOut: [] }));
+      renderDrinkList($('drink-search').value);
       try {
-        await commitControlWrite({ ...newControl, updated: new Date().toISOString() });
-        state.control = { ...newControl };
+        await p;
         renderDrinkList($('drink-search').value);
         renderHomeQuickCards();
       } catch (err) {
+        renderDrinkList($('drink-search').value);
         showErrorBanner(`Clear failed: ${err.message}`);
       }
     }
@@ -3126,13 +3402,14 @@ $('btn-clear-all-addons').addEventListener('click', () => {
     'Clear All Add-ons Sold Out',
     'This will mark all add-ons as available on the kiosk.',
     async () => {
-      const newControl = { ...state.control, soldOutOptions: [] };
+      const p = scheduleWrite(c => ({ ...c, soldOutOptions: [] }));
+      renderAddonList($('addon-search').value);
       try {
-        await commitControlWrite({ ...newControl, updated: new Date().toISOString() });
-        state.control = { ...newControl };
+        await p;
         renderAddonList($('addon-search').value);
         renderHomeQuickCards();
       } catch (err) {
+        renderAddonList($('addon-search').value);
         showErrorBanner(`Clear failed: ${err.message}`);
       }
     }
@@ -3151,7 +3428,7 @@ function renderAddonList(filter = '') {
   const container = $('addon-list-container');
   if (!state.addons.length) return;
 
-  const soldOutOpts = new Set(state.control?.soldOutOptions || []);
+  const soldOutOpts = new Set(controlView().soldOutOptions || []);
   const q = filter.toLowerCase().trim();
 
   // Group addons — preserve order from addons.json, filter by name/group
@@ -3223,40 +3500,36 @@ function buildAddonRow(addon, isSoldOut) {
     </div>`;
 }
 
-/** Optimistic toggle for a single add-on, same pattern as handleToggle for drinks. */
+/** Toggle a single add-on — same queue/landed semantics as handleToggle. */
 async function handleAddonToggle(addonId) {
   if (!navigator.onLine) {
     setAddonRowStatus(addonId, 'failed', 'Offline — tap to retry');
     return;
   }
 
-  const soldOutOpts = new Set(state.control?.soldOutOptions || []);
-  const wasOut = soldOutOpts.has(addonId);
-  if (wasOut) soldOutOpts.delete(addonId); else soldOutOpts.add(addonId);
+  const willBeOut = !(controlView().soldOutOptions || []).includes(addonId);
+  const ticket = ++toggleSeq;
+  lastToggleTicket['a:' + addonId] = ticket;
+  recordQuickUse('a', addonId);
 
-  flipAddonToggleUI(addonId, !wasOut);
+  flipAddonToggleUI(addonId, willBeOut);
   setAddonRowStatus(addonId, 'saving', 'Saving…');
-
-  // Build new control — preserve soldOut and special, only touch soldOutOptions
-  const newControl = {
-    ...state.control,
-    soldOutOptions: Array.from(soldOutOpts),
-  };
+  refreshSoldOutCounts();
 
   try {
-    await scheduleWrite(newControl);
-    setAddonRowStatus(addonId, 'saved', 'Saved');
-    setTimeout(() => setAddonRowStatus(addonId, '', ''), 2500);
-    $('clear-all-addons-row').style.display = soldOutOpts.size > 0 ? 'flex' : 'none';
+    await scheduleWrite(setListMember('soldOutOptions', addonId, willBeOut));
+    if (lastToggleTicket['a:' + addonId] !== ticket) return;
+    setAddonRowStatus(addonId, 'saved', LIVE_MSG);
+    setTimeout(() => { if (lastToggleTicket['a:' + addonId] === ticket) setAddonRowStatus(addonId, '', ''); }, 6000);
   } catch (err) {
-    // Rollback
-    flipAddonToggleUI(addonId, wasOut);
-    if (wasOut) soldOutOpts.add(addonId); else soldOutOpts.delete(addonId);
-    state.control = { ...state.control, soldOutOptions: Array.from(soldOutOpts) };
+    if (lastToggleTicket['a:' + addonId] !== ticket) return;
+    flipAddonToggleUI(addonId, (controlView().soldOutOptions || []).includes(addonId));
     setAddonRowStatus(addonId, 'failed', `Didn't save — tap to retry`);
     const domId = 'addon-' + addonId.replace(/:/g, '-').replace(/[^a-zA-Z0-9-_]/g, '_');
     const statusEl = $(`status-${domId}`);
     if (statusEl) statusEl.onclick = () => handleAddonToggle(addonId);
+  } finally {
+    refreshSoldOutCounts();
   }
 }
 
@@ -3294,6 +3567,138 @@ function setAddonRowStatus(addonId, cls, msg) {
 }
 
 // ----------------------------------------------------------------
+// HOME: ONE-TAP SOLD-OUT LIST + UNDO TOAST
+// ----------------------------------------------------------------
+// The list = items sold out right now, then recently toggled, then most
+// toggled (history kept on this phone), topped up with each category's
+// signature drink. It is built when Home opens and does not reorder while
+// Nick is tapping, so a chip stays under his thumb.
+
+const LS_QUICK = 'tb_quick_soldout_v1';   // { recent: ['d:id', ...], counts: { 'd:id': n } }
+const QUICK_MAX = 8;
+
+function quickHistory() {
+  try {
+    const h = JSON.parse(localStorage.getItem(LS_QUICK) || '{}');
+    return { recent: Array.isArray(h.recent) ? h.recent : [], counts: (h.counts && typeof h.counts === 'object') ? h.counts : {} };
+  } catch (_) { return { recent: [], counts: {} }; }
+}
+
+function recordQuickUse(kind, id) {
+  const key = kind + ':' + id;
+  const h = quickHistory();
+  h.recent = [key, ...h.recent.filter(k => k !== key)].slice(0, 20);
+  h.counts[key] = (h.counts[key] || 0) + 1;
+  try { localStorage.setItem(LS_QUICK, JSON.stringify(h)); } catch (_) {}
+}
+
+function quickItem(key) {
+  const i = key.indexOf(':');
+  const kind = key.slice(0, i), id = key.slice(i + 1);
+  if (kind === 'd') {
+    const d = state.drinks.find(x => x.id === id);
+    return d ? { key, kind, id, name: d.name, sub: d.categoryLabel } : null;
+  }
+  const a = state.addons.find(x => x.id === id);
+  return a ? { key, kind, id, name: a.name, sub: 'Add-on · ' + a.groupLabel } : null;
+}
+
+function quickIsOut(kind, id) {
+  const v = controlView();
+  return ((kind === 'd' ? v.soldOut : v.soldOutOptions) || []).includes(id);
+}
+
+function buildQuickList() {
+  if (!state.drinks.length) return;
+  const v = controlView();
+  const h = quickHistory();
+  const keys = [];
+  const add = k => { if (keys.length < QUICK_MAX && !keys.includes(k) && quickItem(k)) keys.push(k); };
+  (v.soldOut || []).forEach(id => add('d:' + id));
+  (v.soldOutOptions || []).forEach(id => add('a:' + id));
+  h.recent.forEach(add);
+  Object.entries(h.counts).sort((x, y) => y[1] - x[1]).forEach(([k]) => add(k));
+  // Top up with each category's first (signature) drink
+  const seen = new Set();
+  state.drinks.forEach(d => { if (!seen.has(d.category)) { seen.add(d.category); add('d:' + d.id); } });
+  state.quickList = keys;
+}
+
+function renderQuickList() {
+  const grid = $('so-quick-grid');
+  if (!grid || !state.quickList) return;
+  grid.innerHTML = state.quickList.map(k => {
+    const it = quickItem(k);
+    if (!it) return '';
+    const out = quickIsOut(it.kind, it.id);
+    const saving = state.quickSaving && state.quickSaving[k];
+    return `<button class="so-chip${saving ? ' saving' : ''}" type="button" data-key="${escHtml(k)}"
+              aria-pressed="${out}" aria-label="${escHtml(it.name)}: ${out ? 'sold out — tap to bring back' : 'available — tap to mark sold out'}">
+        <span class="so-chip-name">${escHtml(it.name)}</span>
+        <span class="so-chip-sub">${out ? 'SOLD OUT' : escHtml(it.sub)}</span>
+      </button>`;
+  }).join('');
+  grid.querySelectorAll('.so-chip').forEach(b => b.addEventListener('click', () => quickToggle(b.dataset.key)));
+}
+
+/** One-tap toggle from Home, with an undo toast. */
+async function quickToggle(key, isUndo = false) {
+  const it = quickItem(key);
+  if (!it) return;
+  if (!navigator.onLine) { showToast(`Offline — ${it.name} not changed`, null); return; }
+  const listKey = it.kind === 'd' ? 'soldOut' : 'soldOutOptions';
+  const willBeOut = !quickIsOut(it.kind, it.id);
+  if (!isUndo) recordQuickUse(it.kind, it.id);
+  const ticket = ++toggleSeq;
+  lastToggleTicket['q:' + key] = ticket;
+  state.quickSaving = { ...(state.quickSaving || {}), [key]: true };
+  const nm = escHtml(it.name);
+  const what = willBeOut ? `${nm} marked sold out` : `${nm} is available again`;
+  showToast(`${isUndo ? 'Undone · ' : ''}${what}<small>Saving…</small>`, isUndo ? null : () => quickToggle(key, true), true);
+  const p = scheduleWrite(setListMember(listKey, it.id, willBeOut));
+  refreshSoldOutCounts();
+  try {
+    await p;
+    if (lastToggleTicket['q:' + key] === ticket) {
+      showToast(`${isUndo ? 'Undone · ' : ''}${what}<small>${LIVE_MSG}</small>`, isUndo ? null : () => quickToggle(key, true), true);
+    }
+  } catch (err) {
+    if (lastToggleTicket['q:' + key] === ticket) {
+      showToast(`Didn't save — ${escHtml(it.name)}<small>${escHtml(err.message)}</small>`, null, true, 'Retry', () => quickToggle(key, isUndo));
+    }
+  } finally {
+    if (lastToggleTicket['q:' + key] === ticket) {
+      const s2 = { ...(state.quickSaving || {}) }; delete s2[key]; state.quickSaving = s2;
+    }
+    refreshSoldOutCounts();
+    if (state.activeTab === 'soldout') {
+      if (state.soldOutSeg === 'addons') renderAddonList($('addon-search').value); else renderDrinkList($('drink-search').value);
+    }
+  }
+}
+
+let toastTimer = null;
+/** `trusted` html is markup built in this file with every item name passed through escHtml. */
+function showToast(html, onUndo, trusted = false, btnText = 'Undo', onBtn = null) {
+  const t = $('toast'), txt = $('toast-text'), btn = $('toast-btn');
+  txt.innerHTML = trusted ? html : escHtml(html);
+  const action = onBtn || onUndo;
+  btn.style.display = action ? '' : 'none';
+  btn.textContent = btnText;
+  btn.onclick = action ? () => { hideToast(); action(); } : null;
+  t.classList.add('visible');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(hideToast, 8000);
+}
+function hideToast() { $('toast').classList.remove('visible'); }
+
+$('so-quick-more').addEventListener('click', () => {
+  switchTab('soldout');
+  switchSoldOutSeg('drinks');
+  setTimeout(() => $('drink-search').focus(), 50);
+});
+
+// ----------------------------------------------------------------
 // DAILY SPECIAL TAB
 // ----------------------------------------------------------------
 
@@ -3315,32 +3720,32 @@ $('btn-make-special').addEventListener('click', async () => {
   const label = $('special-label-input').value.trim();
   if (!label || label.length > 24) return;
 
-  const newControl = {
-    ...state.control,
-    special: {
-      title:   label,
-      detail:  '',
-      drinkId: state.specialDrinkId,
-    },
-  };
+  const drink = state.drinks.find(d => d.id === state.specialDrinkId);
+  if (!drink) return;
+  const sp = buildMenuSpecial(drink, label);
+  // The kiosk reads only specials[]; the legacy `special` field is cleared so
+  // the file has one source of truth.
+  const newControl = c => ({ ...c, specials: [sp], special: null });
 
   setSpecialSaveStatus('saving', 'Saving…');
+  const p = scheduleWrite(newControl);
+  renderHomeQuickCards();
   try {
-    await scheduleWrite(newControl);
-    setSpecialSaveStatus('saved', 'Special saved');
-    setTimeout(() => setSpecialSaveStatus('', ''), 3000);
-    renderHomeQuickCards();
+    await p;
+    setSpecialSaveStatus('saved', LIVE_MSG);
+    setTimeout(() => setSpecialSaveStatus('', ''), 8000);
   } catch (err) {
     setSpecialSaveStatus('failed', `Save failed: ${err.message}`);
   }
+  renderHomeQuickCards();
 });
 
 $('btn-clear-special').addEventListener('click', async () => {
   openModal(
     'Clear Daily Special',
-    'This will remove the daily special from the kiosk.',
+    'This removes the featured special from the kiosk (including a Drink Lab special).',
     async () => {
-      const newControl = { ...state.control, special: null };
+      const newControl = c => ({ ...c, specials: [], special: null });
       setSpecialSaveStatus('saving', 'Clearing…');
       try {
         await scheduleWrite(newControl);
@@ -3353,11 +3758,12 @@ $('btn-clear-special').addEventListener('click', async () => {
         $('label-char-count').textContent = '0 / 24';
         $('btn-make-special').disabled = true;
         updateSpecialPreview();
-        setSpecialSaveStatus('saved', 'Special cleared');
+        setSpecialSaveStatus('saved', 'Cleared · gone from the kiosk within ~2 min');
         setTimeout(() => setSpecialSaveStatus('', ''), 2500);
         renderHomeQuickCards();
       } catch (err) {
         setSpecialSaveStatus('failed', `Clear failed: ${err.message}`);
+        renderHomeQuickCards();
       }
     }
   );
@@ -3383,14 +3789,63 @@ function updateSpecialPreview() {
     <div class="special-preview">
       <div class="special-preview-tag">${escHtml(label || 'Daily Special')}</div>
       <div class="special-preview-name">${escHtml(name)}</div>
-      <div class="special-preview-detail">Ask about today's featured drink</div>
+      <div class="special-preview-detail">Today's featured drink</div>
     </div>`;
 }
 
-/** Pre-fill form from loaded control state */
+/**
+ * A specials[] entry for a regular menu drink, in the shape the kiosk reads
+ * (same fields the Drink Lab writes). The kiosk prices it from baseItemId
+ * (the real menu item) and greys it out when that drink is sold out.
+ */
+function buildMenuSpecial(drink, label) {
+  return {
+    id:         'sp-menu-' + drink.id + '-' + Date.now(),
+    name:       String(drink.name).slice(0, 28),
+    blurb:      "Today's featured drink",
+    catKey:     drink.category,
+    base:       null,
+    mods:       [],
+    baseItemId: drink.id,
+    drinkId:    drink.id,
+    label:      label,
+    createdBy:  'owner',
+    updated:    new Date().toISOString(),
+  };
+}
+
+/** "On the kiosk now" card: what specials[] holds (incl. queued changes). */
+function renderSpecialLive() {
+  const area = $('special-live-area');
+  if (!area || !state.control) return;
+  const view = controlView();
+  const specials = Array.isArray(view.specials) ? view.specials : [];
+  const pending = writesBusy();
+  let html = '';
+  if (specials.length) {
+    html = specials.map(sp => `
+      <div class="special-live-row">
+        <span class="special-live-tag">${escHtml(sp.label || "Today's Special")}</span>
+        <span class="special-live-name">${escHtml(sp.name || '')}</span>
+        <span class="special-live-src">${sp.createdBy === 'ai' ? 'From Drink Lab' : 'Menu drink'}${pending ? ' · saving…' : ''}</span>
+      </div>`).join('');
+  } else {
+    html = `<div class="special-live-none">Nothing featured on the kiosk${pending ? ' (saving…)' : ''}</div>`;
+  }
+  const legacy = view.special;
+  if (legacy && !specials.length) {
+    const d = state.drinks.find(x => x.id === legacy.drinkId);
+    html += `<div class="special-legacy-warn">“${escHtml(legacy.title || 'Special')} · ${escHtml(d ? d.name : legacy.drinkId || '')}” was saved in the old format, which the kiosk does not show. Tap <b>Make it the Special</b> to put it live.</div>`;
+  }
+  area.innerHTML = html;
+}
+
+/** Pre-fill form from loaded control state (live menu special, else legacy field) */
 function syncSpecialFormFromState() {
-  const sp = state.control?.special;
-  if (!sp) return;
+  const view = controlView();
+  const live = (Array.isArray(view.specials) ? view.specials : []).find(x => x.drinkId);
+  const sp = live ? { title: live.label, drinkId: live.drinkId } : view.special;
+  if (!sp || !sp.drinkId) return;
   state.specialDrinkId = sp.drinkId;
   const drink = state.drinks.find(d => d.id === sp.drinkId);
   state.specialDrinkName = drink ? drink.name : sp.drinkId;
@@ -3857,7 +4312,8 @@ function labRenderResult(drink, price) {
 }
 
 function renderLabSpecials() {
-  const specials = Array.isArray(state.control?.specials) ? state.control.specials : [];
+  const view = controlView();
+  const specials = Array.isArray(view.specials) ? view.specials : [];
   const card = $('lab-specials-card');
   const list = $('lab-specials-list');
   if (!specials.length) {
@@ -3919,8 +4375,6 @@ async function labPublish() {
   // Re-run denylist on edited name
   const safeName = labModerate(finalName) || 'Beach Special';
 
-  const cur = state.control || {};
-  const specials = Array.isArray(cur.specials) ? cur.specials.slice() : [];
   const sp = {
     id:          'sp-' + Date.now(),
     name:        safeName,
@@ -3936,14 +4390,14 @@ async function labPublish() {
   };
 
   // Replace strategy: one featured special at a time
-  const next = { ...cur, specials: [sp] };
+  const next = c => ({ ...c, specials: [sp] });
 
   labSetSaveMsg('saving', 'Publishing…');
   $('btn-lab-publish').disabled = true;
 
   try {
     await scheduleWrite(next);
-    labSetSaveMsg('saved', 'Published — live on kiosk within 90s');
+    labSetSaveMsg('saved', 'Published · live on the kiosk within ~2 min');
     labDrink = null;
     setTimeout(() => {
       labSetSaveMsg('', '');
@@ -3959,9 +4413,7 @@ async function labPublish() {
 }
 
 async function labRemoveSpecial(spId) {
-  const cur = state.control || {};
-  const specials = (Array.isArray(cur.specials) ? cur.specials : []).filter(s => s.id !== spId);
-  const next = { ...cur, specials };
+  const next = c => ({ ...c, specials: (Array.isArray(c.specials) ? c.specials : []).filter(s => s.id !== spId) });
   try {
     await scheduleWrite(next);
     renderLabSpecials();
@@ -3972,7 +4424,7 @@ async function labRemoveSpecial(spId) {
 }
 
 async function labClearAllSpecials() {
-  const next = { ...(state.control || {}), specials: [] };
+  const next = c => ({ ...c, specials: [] });
   try {
     await scheduleWrite(next);
     renderLabSpecials();
@@ -4011,6 +4463,12 @@ $('lab-name-edit').addEventListener('input', e => {
 
 // Pre-fill health URL field and Anthropic key indicator
 function initSettingsTab() {
+  const sel = $('lock-after-select');
+  sel.value = String(lockAfterMs() / 60000);
+  sel.addEventListener('change', () => {
+    try { localStorage.setItem(LS_LOCK_MIN, sel.value); } catch (_) {}
+    resetInactivityTimer();
+  });
   const url = localStorage.getItem(LS_HEALTH) || '';
   $('health-url-input').value = url;
   // Show placeholder in Anthropic key field if a key is stored
@@ -4108,6 +4566,168 @@ function initA2HS() {
     localStorage.setItem(LS_A2HS, '1');
   });
 }
+
+// ----------------------------------------------------------------
+// KIOSK REMOTE CONTROL (kiosk-control.json "commands" + "settings")
+// Same allow-list and limits as the kiosk (kiosk-lib.js); the kiosk
+// re-validates everything anyway. See ../control-schema.md.
+// ----------------------------------------------------------------
+const KIOSK_STATUS_URL = 'https://tb-where.nicholasroper.workers.dev/kiosk/status';
+const KIOSK_SETTINGS = [
+  { key: 'PAY_ENABLED',         label: 'Tap-to-pay (Clover Flex)',              type: 'bool' },
+  { key: 'FLEX_IP',             label: 'Flex IP address',                       type: 'ip',    ph: 'e.g. 192.168.1.50' },
+  { key: 'FLEX_PORT',           label: 'Flex port',                             type: 'int',   min: 1,     max: 65535,  ph: '12345' },
+  { key: 'PAY_TIMEOUT_MS',      label: 'Card tap timeout (ms)',                 type: 'int',   min: 15000, max: 300000, ph: '90000' },
+  { key: 'AI_DESIGN_ENABLED',   label: 'AI “Design your own”',                  type: 'bool' },
+  { key: 'VIBE_MODEL',          label: 'Vibe match AI model',                   type: 'model', ph: 'claude-haiku-4-5' },
+  { key: 'DRINK_MODEL',         label: 'Design-your-own AI model',              type: 'model', ph: 'claude-haiku-4-5' },
+  { key: 'HIDE_CATEGORIES',     label: 'Hidden Clover categories (comma list)', type: 'list',  ph: 'e.g. Staff, Retail' },
+  { key: 'UPDATE_INTERVAL_MIN', label: 'Check for updates every (minutes)',     type: 'int',   min: 5,     max: 1440,   ph: '60' },
+];
+const KIOSK_IP_RE = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
+const KIOSK_MODEL_RE = /^claude-[a-z0-9][a-z0-9.\-]{0,60}$/;
+
+function kioskAgo(min) {
+  if (min == null) return '?';
+  if (min < 1) return 'just now';
+  if (min < 90) return `${min} min ago`;
+  if (min < 2880) return `${Math.round(min / 60)} h ago`;
+  return `${Math.round(min / 1440)} days ago`;
+}
+
+/**
+ * GET the kiosk heartbeat. Returns { kind: 'ok', online, version, ageMin } |
+ * { kind: 'none' } (404 / no reports yet) | { kind: 'error' }.
+ */
+async function fetchKioskStatus() {
+  try {
+    const res = await fetch(KIOSK_STATUS_URL, { cache: 'no-store' });
+    if (res.status === 404) return { kind: 'none' };
+    if (!res.ok) return { kind: 'error' };
+    const d = await res.json();
+    if (!d || !d.lastSeen) return { kind: 'none' };
+    let ageMin = typeof d.ageMin === 'number' ? d.ageMin : null;
+    const t = Date.parse(d.lastSeen);
+    if (ageMin == null && !isNaN(t)) ageMin = Math.max(0, Math.round((Date.now() - t) / 60000));
+    return { kind: 'ok', online: !!d.online, version: d.version, ageMin };
+  } catch (_) { return { kind: 'error' }; }
+}
+
+async function renderKioskStatus() {
+  const el = $('kiosk-remote-status');
+  const st = await fetchKioskStatus();
+  renderKioskStrip(st);
+  el.textContent = st.kind === 'ok'
+    ? `Kiosk: ${st.online ? 'online' : 'OFFLINE'}${st.version ? ' · v' + st.version : ''} · seen ${kioskAgo(st.ageMin)}. Details: thirstybeaches.com/trailer`
+    : st.kind === 'none'
+      ? 'Kiosk: no status reports yet (it starts reporting after the v24 switch-over restart).'
+      : 'Kiosk status unavailable right now.';
+}
+
+/** Top-of-screen strip: kiosk online / last seen. */
+function renderKioskStrip(st) {
+  const strip = $('kiosk-strip'), text = $('kiosk-strip-text');
+  strip.classList.toggle('online', st.kind === 'ok' && st.online);
+  strip.classList.toggle('offline', st.kind === 'ok' && !st.online);
+  if (st.kind === 'ok') {
+    text.textContent = st.online
+      ? `Kiosk online · seen ${kioskAgo(st.ageMin)}${st.version ? ' · v' + st.version : ''}`
+      : `Kiosk OFFLINE · last seen ${kioskAgo(st.ageMin)}`;
+  } else if (st.kind === 'none') {
+    text.textContent = 'Kiosk status: not set up yet';
+  } else {
+    text.textContent = 'Kiosk status unavailable';
+  }
+}
+
+async function pollKioskStrip() {
+  if (!sessionStorage.getItem(SS_TOKEN)) return;
+  renderKioskStrip(await fetchKioskStatus());
+}
+
+function renderKioskSettingsForm() {
+  const box = $('kiosk-settings-fields');
+  const view = controlView();
+  const cur = (view.settings && typeof view.settings === 'object') ? view.settings : {};
+  box.textContent = '';
+  for (const f of KIOSK_SETTINGS) {
+    const g = document.createElement('div'); g.className = 'settings-field-group';
+    const l = document.createElement('label'); l.className = 'settings-label'; l.htmlFor = 'ks-' + f.key; l.textContent = f.label;
+    let input;
+    if (f.type === 'bool') {
+      input = document.createElement('select');
+      for (const [v, t] of [['', 'Use kiosk file'], ['true', 'On'], ['false', 'Off']]) {
+        const o = document.createElement('option'); o.value = v; o.textContent = t; input.appendChild(o);
+      }
+      input.value = cur[f.key] === true ? 'true' : cur[f.key] === false ? 'false' : '';
+    } else {
+      input = document.createElement('input');
+      input.type = f.type === 'int' ? 'number' : 'text';
+      input.placeholder = (f.ph || '') + ' (blank = kiosk file)';
+      input.autocomplete = 'off'; input.spellcheck = false;
+      const v = cur[f.key];
+      input.value = v == null ? '' : Array.isArray(v) ? v.join(', ') : String(v);
+    }
+    input.className = 'settings-input'; input.id = 'ks-' + f.key;
+    g.appendChild(l); g.appendChild(input); box.appendChild(g);
+  }
+}
+
+function readKioskSettingsForm() {
+  const out = {}, errors = [];
+  for (const f of KIOSK_SETTINGS) {
+    const raw = $('ks-' + f.key).value.trim();
+    if (raw === '') continue;
+    if (f.type === 'bool') out[f.key] = raw === 'true';
+    else if (f.type === 'int') {
+      const n = Number(raw);
+      if (!Number.isInteger(n) || n < f.min || n > f.max) errors.push(`${f.label}: ${f.min}–${f.max}`); else out[f.key] = n;
+    } else if (f.type === 'ip') { if (!KIOSK_IP_RE.test(raw)) errors.push(`${f.label}: like 192.168.1.50`); else out[f.key] = raw; }
+    else if (f.type === 'model') { if (!KIOSK_MODEL_RE.test(raw)) errors.push(`${f.label}: like claude-haiku-4-5`); else out[f.key] = raw; }
+    else if (f.type === 'list') {
+      const list = raw.split(',').map(x => x.trim()).filter(Boolean);
+      if (list.length > 50 || list.some(x => x.length > 60)) errors.push(`${f.label}: too long`); else out[f.key] = list;
+    }
+  }
+  return { settings: out, errors };
+}
+
+function renderKioskCard() {
+  renderKioskStatus();
+  renderKioskSettingsForm();
+}
+
+async function sendKioskCommand(name, okText) {
+  const msg = $('kiosk-cmd-msg');
+  if (!state.control) { msg.textContent = 'Not loaded yet — tap Refresh on Home'; return; }
+  msg.textContent = 'Sending…';
+  const at = new Date().toISOString();
+  const next = c => ({ ...c, commands: { ...(c.commands || {}), [name]: at } });
+  try { await scheduleWrite(next); msg.textContent = okText; }
+  catch (err) { msg.textContent = `Failed: ${err.message}`; }
+  setTimeout(() => { msg.textContent = ''; }, 6000);
+}
+$('btn-kiosk-update').addEventListener('click', () => sendKioskCommand('checkUpdateAt', 'Sent · the kiosk checks for an update within ~2 min'));
+$('btn-kiosk-reload').addEventListener('click', () => sendKioskCommand('reloadScreenAt', 'Sent — the screen reloads the next time nobody is using it'));
+$('btn-kiosk-restart').addEventListener('click', () => {
+  if (!confirm('Restart the kiosk server? It waits until nobody is ordering, and is back in a few seconds.')) return;
+  sendKioskCommand('restartAt', 'Sent — restarts when the kiosk is idle');
+});
+$('btn-kiosk-settings-save').addEventListener('click', async () => {
+  const msg = $('kiosk-settings-msg');
+  if (!state.control) { msg.textContent = 'Not loaded yet — tap Refresh on Home'; return; }
+  const { settings, errors } = readKioskSettingsForm();
+  if (errors.length) { msg.textContent = 'Fix: ' + errors.join(' · '); return; }
+  const before = (controlView().settings || {});
+  if (settings.PAY_ENABLED === true && before.PAY_ENABLED !== true &&
+      !confirm('Turn ON tap-to-pay at the kiosk? Customers will be asked to tap their card on the Flex. Only do this once the Flex is paired and tested.')) return;
+  msg.textContent = 'Saving…';
+  try {
+    await scheduleWrite(c => ({ ...c, settings }));
+    msg.textContent = Object.keys(settings).length ? 'Saved · the kiosk applies it within ~2 min' : 'Saved · the kiosk uses kiosk-config.env only (within ~2 min)';
+  } catch (err) { msg.textContent = `Save failed: ${err.message}`; }
+  setTimeout(() => { msg.textContent = ''; }, 6000);
+});
 
 // ----------------------------------------------------------------
 // UTILITY
