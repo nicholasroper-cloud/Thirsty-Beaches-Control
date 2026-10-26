@@ -1,13 +1,13 @@
 {
   "name": "Thirsty Beaches Owner Control",
   "short_name": "TB Control",
-  "description": "Mark drinks sold-out and set the daily special on the Thirsty Beaches kiosk.",
+  "description": "Today's kiosk status, sales, quotes and punch cards, plus sold-out and specials for the Thirsty Beaches kiosk.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "theme_color": "#fff5e6",
-  "background_color": "#fff5e6",
+  "theme_color": "#1B0538",
+  "background_color": "#1B0538",
   "icons": [
     {
       "src": "./icon-192.png?v=logo20261018",

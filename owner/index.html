@@ -4,45 +4,61 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="TB Control">
-  <meta name="theme-color" content="#fff5e6">
+  <meta name="theme-color" content="#1B0538">
   <title>Thirsty Beaches Owner Control</title>
   <link rel="manifest" href="./manifest.webmanifest?v=logo20261018">
   <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=logo20261018">
   <link rel="apple-touch-icon" href="./icon-512.png?v=logo20261018">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@900&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Archivo:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     /* ============================================================
        DESIGN TOKENS
        ============================================================ */
     :root {
-      --bg-sand:        #fff5e6;
-      --bg-sand-deep:   #ffe7cc;
-      --ink:            #163a5f;
-      --ink-soft:       #5a6c82;
-      --ink-muted:      #46576c;  /* secondary text: >=6:1 on white, >=5:1 on sand */
-      --panel:          rgba(255,255,255,0.72);
-      --panel-solid:    rgba(255,255,255,0.92);
-      --border:         rgba(22,58,95,0.14);
-      --border-strong:  rgba(22,58,95,0.26);
-      --cyan:           #34D7FF;
-      --magenta:        #FF3D97;
-      --coral:          #FF8A2B;
-      --gold:           #FFC95C;
-      --price-pink:     #ff177e;
-      --green-live:     #118a4e;  /* darker green for 4.5:1 contrast on white */
-      --red-offline:    #C42b48;  /* accessible red */
-      --grad-brand:     linear-gradient(110deg, #2E8BFF, #FF3D97 54%, #FF8A2B);
-      --grad-cool:      linear-gradient(120deg, #2E8BFF, #34D7FF);
-      --app-bg:         linear-gradient(180deg, #9fe0ff, #fff1d6 46%, #ffd9bd);
-      --radius-card:    22px;
-      --radius-sheet:   28px;
+      /* Brand: the thirstybeaches.com look (void/deep violet chrome, neon accents,
+         Bungee / Archivo / DM Mono). Work surfaces stay light ("foam") with deep-violet
+         ink: dark-on-light reads best on a phone in Florida/Utah sun. */
+      --void:           #09010F;
+      --deep:           #1B0538;
+      --foam:           #FFF4FA;
+      --ink-on-dark:    #FFF4FA;  /* 17:1 on --deep */
+      --ink2-on-dark:   #CBBEE6;  /* 10:1 on --deep */
+      --neon-cyan:      #2AF5E4;
+      --neon-magenta:   #FF3CAC;
+      --purple:         #8A3FFC;
+      --amber:          #FF7A45;
+      --yellow:         #FFD166;
+
+      --bg-sand:        #FFF4FA;  /* foam: page + input fill */
+      --bg-sand-deep:   #F1E4F4;
+      --ink:            #1B0538;  /* 17:1 on white, 16:1 on foam */
+      --ink-soft:       #4A3A6B;  /* 10:1 on white */
+      --ink-muted:      #4A3A6B;
+      --panel:          #FFFFFF;
+      --panel-solid:    #FFFFFF;
+      --border:         rgba(27,5,56,0.14);
+      --border-strong:  rgba(27,5,56,0.30);
+      --focus:          #8A3FFC;  /* 5.4:1 on white: visible focus ring */
+      --cyan:           #2AF5E4;
+      --magenta:        #FF3CAC;
+      --coral:          #FF7A45;
+      --gold:           #FFD166;
+      --price-pink:     #B3105F;  /* magenta family as text: 6.6:1 on white */
+      --green-live:     #0B7A43;  /* 5.6:1 on white */
+      --red-offline:    #C42B48;  /* 5.6:1 on white */
+      --grad-brand:     linear-gradient(100deg, #FF3CAC, #FF7A45); /* with DARK ink: 6:1+ */
+      --grad-cool:      linear-gradient(120deg, #8A3FFC, #2AF5E4);
+      --app-bg:         #FFF4FA;
+      --radius-card:    20px;
+      --radius-sheet:   26px;
       --radius-pill:    999px;
-      --font-head:      'Fraunces', Georgia, serif;
-      --font-ui:        'Outfit', system-ui, sans-serif;
+      --font-head:      'Bungee', system-ui, sans-serif;   /* one weight: never faux-bold */
+      --font-ui:        'Archivo', system-ui, sans-serif;
+      --font-mono:      'DM Mono', ui-monospace, monospace;
     }
 
     /* ============================================================
@@ -1644,6 +1660,254 @@
       margin-top: 3px;
     }
     .char-count.over { color: var(--red-offline); }
+
+    /* ============================================================
+       BRAND: the thirstybeaches.com look (overrides the base rules above)
+       Dark neon chrome (status strip, Today header, tab bar, toast, PIN
+       screen) around light "foam" work surfaces with deep-violet ink.
+       ============================================================ */
+    html { font-synthesis: none; }   /* Bungee has one weight: never fake-bold it */
+    body { font-weight: 500; font-size: 16px; line-height: 1.45; background: var(--app-bg); }
+    body:has(#screen-pin.active) { background: var(--void); }
+    input, textarea, select { font-size: 16px; }     /* iOS: no zoom on focus */
+    .setup-input, .search-bar input, .special-form-input, .lab-brief, .lab-name-edit-input,
+    .settings-input, .sheet-search { font-size: 16px; min-height: 48px; }
+    .setup-input:focus, .search-bar input:focus, .special-form-input:focus, .lab-brief:focus,
+    .lab-name-edit-input:focus, .settings-input:focus, .sheet-search:focus, .t-input:focus {
+      border-color: var(--focus); box-shadow: 0 0 0 3px rgba(138,63,252,0.22);
+    }
+    :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+    /* Display type: Bungee, regular weight only */
+    .pin-title, .tab-header h2, .lab-header h2, .special-preview-name, .lab-drink-name, .modal-title {
+      font-family: var(--font-head); font-weight: 400; letter-spacing: 0.01em;
+    }
+    .tab-header h2, .lab-header h2 { font-size: 26px; line-height: 1.1; }
+    .tab-header p, .lab-header p { font-size: 16px; color: var(--ink-soft); margin-top: 6px; }
+    .modal-title { font-size: 21px; line-height: 1.15; }
+    .modal-body { font-size: 16px; color: var(--ink-soft); }
+
+    /* Labels: DM Mono */
+    .setup-label, .category-label, .special-card-title, .lab-card-title, .special-form-label,
+    .settings-label, .addon-group-label, .lab-name-edit-label {
+      font-family: var(--font-mono); font-weight: 500; font-size: 13px; letter-spacing: 0.06em; color: var(--ink-soft);
+    }
+
+    /* Neon buttons: bright magenta->amber fill with DARK ink */
+    .btn-primary, .btn-make-special, .btn-lab-generate, .btn-lab-publish {
+      color: var(--deep); font-family: var(--font-head); font-weight: 400; letter-spacing: 0.02em;
+      min-height: 52px; font-size: 16px; box-shadow: 0 6px 18px rgba(255,60,172,0.30);
+    }
+    .btn-make-special:disabled, .btn-lab-generate:disabled, .btn-lab-publish:disabled { opacity: 0.45; }
+    .special-preview-tag, .lab-drink-tag { color: var(--deep); font-family: var(--font-mono); font-size: 12px; font-weight: 500; }
+    .btn-secondary, .btn-clear-special, .btn-lab-regen { min-height: 48px; font-size: 15px; font-weight: 700; }
+    .btn-lock-now { background: var(--deep); color: var(--foam); min-height: 52px; font-size: 16px; }
+    .btn-danger { min-height: 52px; font-size: 16px; }
+    .btn-lab-clear-sp { min-height: 44px; font-size: 14px; padding: 8px 14px; }
+    .modal-actions .btn-secondary, .modal-actions .btn-danger-sm { min-height: 48px; font-size: 16px; }
+    .special-preview, .lab-drink-preview {
+      background: linear-gradient(135deg, rgba(255,60,172,0.08), rgba(42,245,228,0.10));
+      border-color: rgba(138,63,252,0.28);
+    }
+
+    /* Readable sizes outdoors */
+    .lock-card-title { font-size: 17px; }
+    .lock-card-desc { font-size: 16px; color: var(--ink-soft); }
+    .drink-row-name { font-size: 16px; }
+    .drink-row-status { font-size: 14px; }
+    .save-status-msg, .lab-save-msg, .settings-save-msg, .lab-error-msg { font-size: 15px; }
+    .char-count { font-size: 13px; }
+    .special-live-src, .special-replace-note, .special-live-none { font-size: 15px; color: var(--ink-soft); }
+    .lab-drink-blurb, .special-preview-detail { font-size: 15px; }
+    .lab-mod-chip { font-size: 14px; }
+    .lab-no-key { display: none; }
+    .empty-state { font-size: 16px; }
+    .search-bar input { padding-left: 42px; }
+
+    /* Dark neon chrome */
+    .kiosk-strip {
+      background: var(--deep); color: var(--ink2-on-dark);
+      border-bottom: 1px solid rgba(42,245,228,0.22);
+      backdrop-filter: none; -webkit-backdrop-filter: none;
+      font-size: 14px; font-weight: 600; min-height: 36px;
+    }
+    .kiosk-strip-dot { background: #8F80B0; }
+    .kiosk-strip.online  { color: #8AF7C0; }
+    .kiosk-strip.online  .kiosk-strip-dot { background: #3BE08A; box-shadow: 0 0 8px rgba(59,224,138,0.8); }
+    .kiosk-strip.offline { color: #FFA3B5; }
+    .kiosk-strip.offline .kiosk-strip-dot { background: #FF5C7A; }
+    .tab-bar {
+      background: var(--deep); border-top: 1px solid rgba(42,245,228,0.25);
+      backdrop-filter: none; -webkit-backdrop-filter: none;
+    }
+    .tab-btn { color: var(--ink2-on-dark); font-size: 12.5px; font-weight: 600; }
+    .tab-btn.active { color: var(--foam); }
+    .tab-btn.active svg { color: var(--neon-cyan); filter: drop-shadow(0 0 5px rgba(42,245,228,0.65)); }
+    .tab-btn.active::after { background: var(--neon-cyan); box-shadow: 0 0 10px rgba(42,245,228,0.9); width: 40px; }
+    .offline-banner { font-size: 15px; }
+
+    /* Bottom stack: A2HS tip above the undo toast, never on top of it */
+    .bottom-stack {
+      position: fixed; left: 50%; transform: translateX(-50%);
+      bottom: calc(74px + env(safe-area-inset-bottom));
+      width: calc(100% - 24px); max-width: 406px;
+      display: flex; flex-direction: column; gap: 8px;
+      z-index: 150; pointer-events: none;
+    }
+    .bottom-stack > * { pointer-events: auto; }
+    .bottom-stack .toast, .bottom-stack .a2hs-banner {
+      position: static; transform: none; left: auto; bottom: auto; width: 100%; max-width: none;
+    }
+    .toast { background: var(--deep); color: var(--foam); border: 1px solid rgba(42,245,228,0.4); font-size: 15px; }
+    .toast-text small { color: var(--ink2-on-dark); font-size: 14px; }
+    .toast-btn { background: var(--neon-cyan); color: var(--deep); font-family: var(--font-head); font-weight: 400; }
+    .a2hs-banner {
+      background: var(--void); color: var(--foam); border: 1px solid rgba(255,60,172,0.55);
+      font-size: 15px; align-items: center; padding: 10px 8px 10px 16px;
+    }
+    .a2hs-banner-close {
+      width: 44px; height: 44px; opacity: 1; color: var(--foam);
+      display: flex; align-items: center; justify-content: center; border-radius: 12px;
+      background: rgba(255,255,255,0.10);
+    }
+
+    /* Logo: glow on dark, no plate */
+    .brand-logo { background: transparent; padding: 0; border-radius: 0; filter: drop-shadow(0 0 12px rgba(255,60,172,0.45)); }
+
+    /* PIN screen: dark, like the website */
+    #screen-pin {
+      background: radial-gradient(120% 60% at 50% 0%, #2A0B55 0%, var(--void) 62%);
+      color: var(--foam);
+      --ink: var(--foam); --ink-soft: var(--ink2-on-dark);
+      --panel-solid: rgba(255,255,255,0.06); --border: rgba(42,245,228,0.38); --border-strong: rgba(42,245,228,0.55);
+      --bg-sand-deep: rgba(42,245,228,0.20); --red-offline: #FFA3B5; --focus: var(--neon-cyan);
+    }
+    .pin-logo { width: 200px; margin-top: calc(env(safe-area-inset-top, 0px) + 20px); }
+    .pin-title { font-size: 26px; }
+    .pin-subtitle { font-size: 16px; color: var(--ink2-on-dark); }
+    .pin-key { color: var(--foam); box-shadow: none; font-family: var(--font-mono); font-weight: 500; font-size: 28px; }
+    .pin-key.pin-back { color: var(--foam); }
+    .pin-error-msg, .pin-lockout-msg { font-size: 15px; }
+    #screen-pin .setup-input { background: rgba(255,255,255,0.06); color: var(--foam); }
+    #screen-pin .setup-input::placeholder { color: #A99BC9; }
+    #screen-pin #setup-panel p { font-size: 14px !important; color: var(--ink2-on-dark) !important; }
+    #pin-confirm-row p { font-size: 15px !important; color: var(--ink2-on-dark) !important; }
+
+    /* Sheet: header with a real Close button */
+    .sheet { background: var(--foam); }
+    .sheet-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 0 12px 10px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .sheet-title {
+      padding: 0; border: 0; text-align: left;
+      font-family: var(--font-head); font-weight: 400; font-size: 20px;
+    }
+    .sheet-close {
+      min-height: 44px; min-width: 76px; padding: 0 16px; border-radius: var(--radius-pill);
+      border: 1.5px solid var(--border-strong); background: #fff; color: var(--ink); font-size: 16px; font-weight: 700;
+    }
+    .sheet-drink-item { width: 100%; text-align: left; min-height: 52px; font-size: 16px; gap: 10px; }
+    .sheet-drink-cat { font-size: 13px; color: var(--ink-soft); font-family: var(--font-mono); }
+    .sheet-overlay, .modal-overlay { background: rgba(9,1,15,0.55); }
+    .modal { background: var(--foam); }
+
+    /* ============================================================
+       TODAY SCREEN
+       ============================================================ */
+    .today-head {
+      margin: -12px -16px 16px; padding: 10px 16px 18px;
+      background: linear-gradient(180deg, var(--deep) 0%, #2A0B55 100%);
+      color: var(--foam); border-radius: 0 0 24px 24px;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .today-head picture { flex-shrink: 0; }
+    .today-logo { width: 104px; height: auto; display: block; filter: drop-shadow(0 0 10px rgba(255,60,172,0.5)); }
+    .today-head h1 { font-family: var(--font-head); font-weight: 400; font-size: 30px; line-height: 1; color: var(--foam); }
+    .today-date { font-family: var(--font-mono); font-size: 15px; color: var(--ink2-on-dark); margin-top: 6px; }
+
+    .t-card, .so-quick {
+      background: #fff; border: 1.5px solid var(--border); border-radius: var(--radius-card);
+      padding: 16px; margin-bottom: 14px;
+    }
+    .t-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+    .t-label {
+      font-family: var(--font-mono); font-weight: 500; font-size: 13px; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--ink-soft);
+    }
+    .t-status { display: flex; align-items: center; gap: 10px; font-size: 24px; font-weight: 800; line-height: 1.15; }
+    .t-status.is-on { color: var(--green-live); }
+    .t-status.is-off { color: var(--red-offline); }
+    .t-dot { width: 14px; height: 14px; border-radius: 50%; background: #8F80B0; flex-shrink: 0; }
+    .t-dot.on { background: var(--green-live); box-shadow: 0 0 0 4px rgba(11,122,67,0.15); }
+    .t-dot.off { background: var(--red-offline); border-radius: 3px; }
+    .t-big { font-family: var(--font-mono); font-weight: 500; font-size: 36px; line-height: 1.05; color: var(--ink); letter-spacing: -0.01em; }
+    .t-big-unit { font-family: var(--font-ui); font-size: 17px; font-weight: 700; color: var(--ink-soft); letter-spacing: 0; }
+    .t-sub { font-size: 16px; color: var(--ink-soft); margin-top: 4px; }
+    .t-msg { font-size: 16px; color: var(--ink-soft); }
+    .t-warn { color: var(--red-offline); font-weight: 700; }
+    .t-fine { font-size: 14px; color: var(--ink-soft); margin-top: 8px; }
+    .t-list { list-style: none; margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .t-list li {
+      padding: 10px 12px; border-radius: 12px; background: var(--foam); border: 1px solid var(--border);
+      font-size: 15px; line-height: 1.4; color: var(--ink); overflow-wrap: anywhere;
+    }
+    .t-list li span { color: var(--ink-soft); }
+    .t-errs li { background: #FDECEF; border-color: rgba(196,43,72,0.3); font-family: var(--font-mono); font-size: 13.5px; }
+    .t-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .t-btn {
+      display: inline-flex; align-items: center; justify-content: center; text-align: center;
+      min-height: 44px; padding: 8px 16px; border-radius: var(--radius-pill);
+      border: 1.5px solid var(--border-strong); background: #fff; color: var(--ink);
+      font-size: 15px; font-weight: 700; text-decoration: none; line-height: 1.2;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .t-btn:active { transform: scale(0.97); }
+    .t-btn:disabled { opacity: 0.5; }
+    .t-btn.neon {
+      background: var(--grad-brand); border-color: transparent; color: var(--deep);
+      font-family: var(--font-head); font-weight: 400; letter-spacing: 0.02em; font-size: 15px;
+    }
+    .t-special-name { font-size: 20px; font-weight: 800; color: var(--ink); line-height: 1.25; }
+    .t-input-row { display: flex; gap: 8px; }
+    .t-input {
+      flex: 1; min-width: 0; min-height: 48px; padding: 10px 14px; border-radius: 14px;
+      border: 1.5px solid var(--border-strong); background: var(--foam); color: var(--ink);
+      font-family: var(--font-ui); font-size: 17px; font-weight: 600; outline: none;
+    }
+    .t-input::placeholder { color: #6E6190; font-weight: 500; }
+    .t-input-row .t-btn { min-width: 84px; min-height: 48px; }
+    #t-card-body:not(:empty) { margin-top: 12px; }
+    .t-punches { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+    .t-punch { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border-strong); }
+    .t-punch.on { background: var(--magenta); border-color: var(--magenta); }
+    .t-free { margin-top: 10px; font-size: 16px; font-weight: 700; color: var(--ink-soft); }
+    .t-free.on { color: #7A4A00; background: #FFF1CC; border: 1px solid #FFD166; border-radius: 12px; padding: 8px 12px; display: inline-block; }
+    .t-foot { justify-content: center; margin-top: 4px; }
+    .t-foot .t-btn { flex: 1; max-width: 180px; }
+    .last-sync { font-size: 15px; color: var(--ink-soft); text-align: center; margin-top: 12px; }
+    .health-banner { padding: 14px 16px; margin-bottom: 14px; }
+    .health-banner.checking, .health-banner.unknown { background: #fff; }
+    .health-banner-detail { font-size: 15px; }
+
+    /* Sold out one-tap (Today) */
+    .so-quick-head { margin-bottom: 2px; align-items: center; }
+    .so-quick-title { font-size: 18px; font-weight: 800; }
+    .so-quick-hint { display: block; font-size: 15px; color: var(--ink-soft); margin-bottom: 10px; }
+    .so-quick-count {
+      font-family: var(--font-mono); font-size: 13px; font-weight: 500; padding: 4px 10px;
+      border-radius: var(--radius-pill); background: var(--bg-sand-deep); color: var(--ink); white-space: nowrap;
+    }
+    .so-quick-count.has-out { background: var(--red-offline); color: #fff; }
+    .so-chip { background: var(--foam); }
+    .so-chip-name { font-size: 16px; }
+    .so-chip-sub { font-size: 14px; color: var(--ink-soft); }
+    .so-quick-more { min-height: 48px; font-size: 15px; }
+
+    /* Settings */
+    .secret-state { font-size: 15px; color: var(--ink-soft); margin-top: 6px; }
+    .secret-state.on { color: var(--green-live); font-weight: 700; }
+    #kiosk-remote-card .btn-secondary { flex: 1 1 auto; }
   </style>
 </head>
 <body>
@@ -1654,8 +1918,11 @@
        ============================================================ -->
   <div id="screen-pin" class="screen active" role="main" aria-label="Authentication">
 
-    <img class="pin-logo brand-logo" src="./logo.png?v=logo20261018"
-         width="1000" height="666" alt="Thirsty Beaches. Stay thirsty, beaches.">
+    <picture>
+      <source srcset="./logo-480.webp?v=brand20261025" type="image/webp">
+      <img class="pin-logo brand-logo" src="./logo.png?v=logo20261018"
+           width="480" height="320" alt="Thirsty Beaches. Stay thirsty, beaches.">
+    </picture>
 
     <h1 class="pin-title">TB Control</h1>
     <p class="pin-subtitle" id="pin-subtitle-text">Enter your PIN to continue</p>
@@ -1740,20 +2007,53 @@
       <!-- ======================================================
            TAB: HOME
            ====================================================== -->
-      <div id="tab-home" class="tab-page active" role="main" aria-label="Home">
-        <div class="home-header">
-          <img class="home-logo brand-logo" src="./logo.png?v=logo20261018"
-               width="1000" height="666" alt="Thirsty Beaches">
-          <h1>Thirsty Beaches</h1>
-          <p id="home-subtitle">Owner Control Panel</p>
+      <div id="tab-home" class="tab-page active" role="main" aria-label="Today">
+        <header class="today-head">
+          <picture>
+            <source srcset="./logo-480.webp?v=brand20261025" type="image/webp">
+            <img class="today-logo" src="./logo.png?v=logo20261018" width="480" height="320" alt="Thirsty Beaches">
+          </picture>
+          <div>
+            <h1>Today</h1>
+            <p class="today-date" id="today-date"></p>
+          </div>
+        </header>
+
+        <!-- Kiosk: online / version / last seen (+ errors with the staff secret) -->
+        <section class="t-card" id="t-kiosk" aria-labelledby="t-kiosk-label">
+          <div class="t-card-head">
+            <h2 class="t-label" id="t-kiosk-label">Kiosk</h2>
+          </div>
+          <div id="t-kiosk-body" role="status" aria-live="polite">
+            <div class="t-status"><span class="t-dot" aria-hidden="true"></span><span>Checking…</span></div>
+          </div>
+        </section>
+
+        <!-- Optional healthchecks.io badge (only shown once a URL is saved in Settings) -->
+        <div class="health-banner unknown" id="health-banner" style="display:none"
+             role="status" aria-live="polite" aria-label="Uptime monitor status">
+          <div class="health-banner-icon" id="health-icon" aria-hidden="true"></div>
+          <div class="health-banner-text">
+            <div class="health-banner-title" id="health-title">Checking status…</div>
+            <div class="health-banner-detail" id="health-detail">Connecting to health monitor</div>
+          </div>
         </div>
+
+        <!-- Sales so far today (station /api/report) -->
+        <section class="t-card" id="t-sales" aria-labelledby="t-sales-label">
+          <div class="t-card-head">
+            <h2 class="t-label" id="t-sales-label">Sales today</h2>
+          </div>
+          <div id="t-sales-body" role="status" aria-live="polite"><p class="t-msg">Loading…</p></div>
+        </section>
 
         <!-- One-tap sold-out list (current sold-out, recently toggled, most used) -->
         <section class="so-quick" id="so-quick" aria-labelledby="so-quick-title">
           <div class="so-quick-head">
             <h2 class="so-quick-title" id="so-quick-title">Sold out — one tap</h2>
-            <span class="so-quick-hint">Tap again to bring back</span>
+            <span class="so-quick-count" id="qc-soldout-count">—</span>
           </div>
+          <p class="so-quick-hint">Tap again to bring it back</p>
           <div class="so-quick-grid" id="so-quick-grid">
             <div class="skeleton skeleton-row" style="height:52px"></div>
             <div class="skeleton skeleton-row" style="height:52px"></div>
@@ -1761,68 +2061,45 @@
           <button class="so-quick-more" id="so-quick-more" type="button">Find another item…</button>
         </section>
 
-        <!-- Health banner -->
-        <div class="health-banner unknown" id="health-banner"
-             role="status" aria-live="polite" aria-label="Kiosk health status">
-          <div class="health-banner-icon" id="health-icon" aria-hidden="true">
-            <!-- icon set by JS -->
+        <!-- Special on the kiosk -->
+        <section class="t-card" id="t-special" aria-labelledby="t-special-label">
+          <div class="t-card-head">
+            <h2 class="t-label" id="t-special-label">Special on the kiosk</h2>
           </div>
-          <div class="health-banner-text">
-            <div class="health-banner-title" id="health-title">Checking status…</div>
-            <div class="health-banner-detail" id="health-detail">Connecting to health monitor</div>
+          <p class="t-special-name" id="qc-special-val">None</p>
+          <div class="t-row">
+            <button class="t-btn" type="button" onclick="switchTab('special')">Pick a menu drink</button>
+            <button class="t-btn neon" type="button" onclick="switchTab('lab')">Drink Lab</button>
           </div>
+        </section>
+
+        <!-- Quotes waiting (tb-where /quotes) -->
+        <section class="t-card" id="t-quotes" aria-labelledby="t-quotes-label">
+          <div class="t-card-head">
+            <h2 class="t-label" id="t-quotes-label">Event quotes</h2>
+          </div>
+          <div id="t-quotes-body" role="status" aria-live="polite"><p class="t-msg">Loading…</p></div>
+        </section>
+
+        <!-- Punch card by phone (tb-where /card/byphone) -->
+        <section class="t-card" id="t-card" aria-labelledby="t-card-label">
+          <div class="t-card-head">
+            <h2 class="t-label" id="t-card-label">Find a punch card</h2>
+          </div>
+          <form class="t-input-row" id="t-card-form" autocomplete="off">
+            <label class="sr-only" for="t-card-phone">Customer phone number</label>
+            <input class="t-input" type="tel" id="t-card-phone" inputmode="tel" maxlength="20"
+                   placeholder="Phone, e.g. 801 555 0123" autocomplete="off">
+            <button class="t-btn neon" type="submit" id="t-card-find">Find</button>
+          </form>
+          <div id="t-card-body" role="status" aria-live="polite"></div>
+        </section>
+
+        <div class="t-row t-foot">
+          <button class="t-btn" type="button" id="t-refresh" onclick="refreshToday(true)">Refresh</button>
+          <button class="t-btn" type="button" onclick="lockApp()">Lock now</button>
         </div>
-
-        <!-- Quick actions -->
-        <div class="quick-grid">
-
-          <button class="quick-card" id="qc-soldout" aria-label="Sold-out drinks — tap to manage"
-                  onclick="switchTab('soldout')">
-            <div class="quick-card-icon coral" aria-hidden="true">
-              <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1-9V5a1 1 0 112 0v4a1 1 0 01-2 0zm1 7a1.25 1.25 0 100-2.5A1.25 1.25 0 0010 16z" clip-rule="evenodd"/>
-              </svg>
-            </div>
-            <div class="quick-card-label">Sold Out</div>
-            <div class="quick-card-value accent-coral" id="qc-soldout-count">—</div>
-          </button>
-
-          <button class="quick-card" id="qc-special" aria-label="Daily special — tap to manage"
-                  onclick="switchTab('special')">
-            <div class="quick-card-icon magenta" aria-hidden="true">
-              <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-              </svg>
-            </div>
-            <div class="quick-card-label">Daily Special</div>
-            <div class="quick-card-value accent-magenta" id="qc-special-val">None</div>
-          </button>
-
-          <button class="quick-card" aria-label="Refresh kiosk status" onclick="refreshAll()">
-            <div class="quick-card-icon cyan" aria-hidden="true">
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-              </svg>
-            </div>
-            <div class="quick-card-label">Refresh</div>
-            <div class="quick-card-value" id="qc-last-update">—</div>
-          </button>
-
-          <button class="quick-card" aria-label="Lock app" onclick="lockApp()">
-            <div class="quick-card-icon ink" aria-hidden="true">
-              <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
-                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
-              </svg>
-            </div>
-            <div class="quick-card-label">Lock</div>
-            <div class="quick-card-value" style="font-size:14px;">Now</div>
-          </button>
-
-        </div><!-- /.quick-grid -->
-
-        <p style="font-size:13px;color:var(--ink-muted);text-align:center;margin-top:8px;" id="last-sync-line">
-          Last sync: —
-        </p>
+        <p class="last-sync" id="last-sync-line">Last sync: —</p>
 
       </div><!-- /#tab-home -->
 
@@ -1966,18 +2243,10 @@
       <div id="tab-lab" class="tab-page" role="main" aria-label="Drink Lab">
         <div class="lab-header">
           <h2>Drink Lab</h2>
-          <p>Describe a special — AI invents the recipe</p>
+          <p>Describe a special and the AI invents it from your menu</p>
         </div>
 
-        <!-- No-key placeholder (shown when Anthropic key not set) -->
-        <div id="lab-no-key" class="lab-card" style="display:none;">
-          <div class="lab-no-key">
-            Add your Anthropic API key in Settings to use the Drink Lab.<br><br>
-            Set a spend limit at <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> before pasting the key.
-          </div>
-        </div>
-
-        <!-- Brief input (shown when key is set) -->
+        <!-- Brief input (AI runs on thirstybeaches.com, signed in with this app's GitHub token) -->
         <div id="lab-input-section" class="lab-card">
           <div class="lab-card-title">Brief</div>
           <textarea class="lab-brief" id="lab-brief-input"
@@ -2042,10 +2311,10 @@
       <!-- ======================================================
            TAB: LOCK / SETTINGS
            ====================================================== -->
-      <div id="tab-lock" class="tab-page" role="main" aria-label="Settings and lock">
+      <div id="tab-lock" class="tab-page" role="main" aria-label="Settings">
         <div class="tab-header">
           <h2>Settings</h2>
-          <p>Manage your token, PIN, and uptime monitor</p>
+          <p>Lock, kiosk remote control, and the secrets this phone keeps</p>
         </div>
 
         <div class="lock-card">
@@ -2087,7 +2356,7 @@
         <div class="lock-card">
           <div class="lock-card-title">Uptime Monitor</div>
           <div class="lock-card-desc">
-            Optional: paste a healthchecks.io status URL to show live kiosk status on the Home screen.
+            Optional: paste a healthchecks.io status URL to also show that badge on the Today screen.
           </div>
           <div class="settings-field-group">
             <label class="settings-label" for="health-url-input">Healthchecks.io Status URL</label>
@@ -2101,29 +2370,45 @@
           </button>
         </div>
 
-        <div class="lock-card">
-          <div class="lock-card-title">Anthropic API Key</div>
+        <div class="lock-card" id="secrets-card">
+          <div class="lock-card-title">Staff secret &amp; station key</div>
           <div class="lock-card-desc">
-            Required for the Drink Lab. Encrypted on this device with your PIN, never transmitted except directly to Anthropic.
-            Set a spend limit at <strong>console.anthropic.com</strong> before saving.
+            Type each one once. They are encrypted on this phone with your PIN, never saved in the repo,
+            and only ever sent to their own service: the staff secret to the trailer server (tb-where), the
+            station key to station.thirstybeaches.com. The Today screen uses them for quotes, punch cards,
+            kiosk errors and sales.
           </div>
           <div class="settings-field-group">
-            <label class="settings-label" for="anthropic-key-input">Anthropic API Key</label>
-            <input class="settings-input" type="password" id="anthropic-key-input"
-                   placeholder="sk-ant-…"
-                   autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-                   aria-label="Anthropic API key">
-            <div class="settings-save-msg" id="anthropic-key-save-msg"></div>
+            <label class="settings-label" for="secret-staff-input">Trailer staff secret</label>
+            <input class="settings-input" type="password" id="secret-staff-input"
+                   placeholder="The secret you use on the trailer page"
+                   autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <div class="secret-state" id="secret-staff-state"></div>
           </div>
-          <button class="btn-secondary" id="btn-save-anthropic-key" style="margin-top:4px;">
-            Save Key
-          </button>
+          <div class="t-row" style="margin-top:0">
+            <button class="btn-secondary" id="btn-save-staff" type="button">Save staff secret</button>
+            <button class="btn-secondary" id="btn-forget-staff" type="button">Remove</button>
+          </div>
+          <div class="settings-save-msg" id="secret-staff-msg" role="status" aria-live="polite"></div>
+
+          <div class="settings-field-group" style="margin-top:18px">
+            <label class="settings-label" for="secret-station-input">Station key</label>
+            <input class="settings-input" type="password" id="secret-station-input"
+                   placeholder="The key in your make-station link (?k=…)"
+                   autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <div class="secret-state" id="secret-station-state"></div>
+          </div>
+          <div class="t-row" style="margin-top:0">
+            <button class="btn-secondary" id="btn-save-station" type="button">Save station key</button>
+            <button class="btn-secondary" id="btn-forget-station" type="button">Remove</button>
+          </div>
+          <div class="settings-save-msg" id="secret-station-msg" role="status" aria-live="polite"></div>
         </div>
 
         <div class="lock-card">
           <div class="lock-card-title">Forget Token &amp; Wipe</div>
           <div class="lock-card-desc">
-            Removes your encrypted token, Anthropic key, and PIN from this device. You will need to re-enter them on next open. This does NOT revoke the GitHub token.
+            Removes your encrypted GitHub token, staff secret, station key and PIN from this device. You will need to re-enter them on next open. This does NOT revoke the GitHub token.
           </div>
           <button class="btn-danger" id="btn-wipe">Wipe All Credentials</button>
         </div>
@@ -2139,10 +2424,10 @@
               aria-selected="true" aria-controls="tab-home"
               onclick="switchTab('home')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" aria-hidden="true">
-          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-          <polyline points="9,22 9,12 15,12 15,22"/>
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
         </svg>
-        Home
+        Today
       </button>
 
       <button class="tab-btn" id="tab-btn-soldout" role="tab"
@@ -2180,10 +2465,10 @@
               aria-selected="false" aria-controls="tab-lock"
               onclick="switchTab('lock')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" aria-hidden="true">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-          <path d="M7 11V7a5 5 0 0110 0v4"/>
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/>
         </svg>
-        Lock
+        Settings
       </button>
 
     </nav>
@@ -2194,10 +2479,13 @@
   <!-- ============================================================
        BOTTOM SHEET: Drink Picker
        ============================================================ -->
-  <div class="sheet-overlay" id="sheet-overlay" role="dialog" aria-modal="true" aria-label="Choose a drink">
+  <div class="sheet-overlay" id="sheet-overlay" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
     <div class="sheet">
       <div class="sheet-handle" aria-hidden="true"></div>
-      <div class="sheet-title">Choose a Drink</div>
+      <div class="sheet-head">
+        <h2 class="sheet-title" id="sheet-title">Choose a drink</h2>
+        <button class="sheet-close" id="sheet-close" type="button">Close</button>
+      </div>
       <div class="sheet-search-wrap">
         <input class="sheet-search" type="search" id="sheet-search"
                placeholder="Search drinks…" aria-label="Search drinks in picker" autocomplete="off">
@@ -2212,7 +2500,7 @@
   <!-- ============================================================
        CONFIRM MODAL
        ============================================================ -->
-  <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true">
+  <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-body">
     <div class="modal">
       <div class="modal-title" id="modal-title">Are you sure?</div>
       <div class="modal-body" id="modal-body">This action cannot be undone.</div>
@@ -2224,25 +2512,23 @@
   </div>
 
 
-  <!-- Undo toast -->
-  <div class="toast" id="toast" role="status" aria-live="polite">
-    <div class="toast-text" id="toast-text"></div>
-    <button class="toast-btn" id="toast-btn" type="button">Undo</button>
-  </div>
-
-  <!-- ============================================================
-       A2HS COACHMARK (iOS Safari)
-       ============================================================ -->
-  <div class="a2hs-banner" id="a2hs-banner" role="complementary" aria-label="Add to Home Screen suggestion">
-    <div class="a2hs-banner-text">
-      <strong>Add to Home Screen</strong> for the best experience.
-      Tap the Share button below, then "Add to Home Screen".
+  <!-- Bottom stack: the Add-to-Home-Screen tip sits ABOVE the undo toast (they never overlap) -->
+  <div class="bottom-stack" id="bottom-stack">
+    <div class="a2hs-banner" id="a2hs-banner" role="complementary" aria-label="Add to Home Screen suggestion">
+      <div class="a2hs-banner-text">
+        <strong>Add to Home Screen</strong> for the best experience.
+        Tap the Share button below, then "Add to Home Screen".
+      </div>
+      <button class="a2hs-banner-close" id="a2hs-close" aria-label="Dismiss">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="22" height="22" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
     </div>
-    <button class="a2hs-banner-close" id="a2hs-close" aria-label="Dismiss">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="24" height="24" aria-hidden="true">
-        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-      </svg>
-    </button>
+    <div class="toast" id="toast" role="status" aria-live="polite">
+      <div class="toast-text" id="toast-text"></div>
+      <button class="toast-btn" id="toast-btn" type="button">Undo</button>
+    </div>
   </div>
 
 </div><!-- /#app -->
@@ -2435,10 +2721,11 @@ async function unlockSession(pin) {
   const token = await decryptToken(pin, stored);
   // store plaintext in sessionStorage only — cleared on page close
   sessionStorage.setItem(SS_TOKEN, token);
-  // Cache PIN in memory so Settings can re-encrypt the Anthropic key
+  // Cache PIN in memory so Settings can encrypt a newly typed secret
   state.sessionPin = pin;
-  // Also load Anthropic key if stored — ignore failure (key may not be set yet)
-  await loadAnthropicKey(pin).catch(() => {});
+  // Decrypt the trailer secrets (staff secret, station key) into this session — ignore failures
+  await loadSecrets(pin).catch(() => {});
+  dropLegacyAnthropicKey();
 }
 
 /** Get session token. Never returns null silently — throws if missing. */
@@ -2448,10 +2735,10 @@ function getSessionToken() {
   return t;
 }
 
-/** Lock: clear session token + Anthropic key, reset UI to PIN screen. */
+/** Lock: clear session token + decrypted secrets, reset UI to PIN screen. */
 function lockApp() {
   sessionStorage.removeItem(SS_TOKEN);
-  clearAnthropicSession();
+  clearSecretSessions();
   state.sessionPin = null;
   clearInactivityTimer();
   showScreen('pin');
@@ -2468,9 +2755,9 @@ function lockApp() {
 /** Wipe all stored credentials (forget everything). */
 function wipeCredentials() {
   localStorage.removeItem(LS_CREDS);
-  localStorage.removeItem(LS_ANTH_CREDS);
+  for (const name of Object.keys(SECRETS)) forgetSecret(name);
+  dropLegacyAnthropicKey();
   sessionStorage.removeItem(SS_TOKEN);
-  clearAnthropicSession();
   clearInactivityTimer();
   showScreen('pin');
   state = { ...state, currentPin: '', inSetupFlow: true, setupStep: 'token',
@@ -2761,6 +3048,8 @@ function switchTab(name) {
   if (name === 'lock') renderKioskCard();
   if (name === 'special') renderSpecialLive();
   if (name === 'home' && state.control) { buildQuickList(); renderQuickList(); }
+  if (name === 'home') refreshToday();
+  if (name === 'lock') renderSecretStates();
 
   // Refresh lab key gate and live specials when entering Drink Lab
   if (name === 'lab') {
@@ -2774,10 +3063,12 @@ function enterApp() {
   resetInactivityTimer();
   loadAll();
   initA2HS();
-  pollKioskStrip();
+  if (state.activeTab === 'home') refreshToday(); else pollKioskStrip();
   if (!state.kioskStripTimer) {
     state.kioskStripTimer = setInterval(() => {
-      if (document.visibilityState === 'visible') pollKioskStrip();
+      if (document.visibilityState !== 'visible') return;
+      pollKioskStrip();
+      if (state.activeTab === 'home') { loadTodaySales(); loadTodayQuotes(); }
     }, 60_000);
   }
 }
@@ -3080,17 +3371,17 @@ function renderHomeQuickCards() {
   const drinkCount  = (view.soldOut || []).length;
   const addonCount  = (view.soldOutOptions || []).length;
   const totalCount  = drinkCount + addonCount;
-  $('qc-soldout-count').textContent = totalCount === 0 ? 'None' : totalCount;
+  setSoldOutBadge(totalCount);
 
   // Special (prefer specials[] array; fall back to legacy special field)
   const specials = Array.isArray(view.specials) ? view.specials : [];
   if (specials.length) {
     $('qc-special-val').textContent = specials.length === 1
-      ? truncate(specials[0].name, 10)
-      : `${specials.length} live`;
+      ? specials[0].name
+      : `${specials.length} specials live`;
   } else {
     // A legacy-only `special` is not shown by the kiosk, so it is not "live"
-    $('qc-special-val').textContent = 'None';
+    $('qc-special-val').textContent = 'Nothing featured right now';
   }
   renderSpecialLive();
   if (state.activeTab === 'home' || !state.quickList) buildQuickList();
@@ -3105,10 +3396,8 @@ function renderHomeQuickCards() {
 
 function updateHealthBanner() {
   const healthUrl = localStorage.getItem(LS_HEALTH);
-  if (!healthUrl) {
-    setHealthBannerState('unknown', 'Uptime alerts not set up', 'Add a healthchecks.io URL in Settings');
-    return;
-  }
+  $('health-banner').style.display = healthUrl ? '' : 'none';
+  if (!healthUrl) return;
   setHealthBannerState('checking', 'Checking status…', 'Connecting to health monitor');
   fetchHealthStatus(healthUrl);
 }
@@ -3308,11 +3597,17 @@ async function handleToggle(drinkId) {
   }
 }
 
+function setSoldOutBadge(n) {
+  const el = $('qc-soldout-count');
+  el.textContent = n ? `${n} out` : 'All in';
+  el.classList.toggle('has-out', !!n);
+}
+
 /** Quick-card count + clear-all visibility from the current view. */
 function refreshSoldOutCounts() {
   const view = controlView();
   const d = (view.soldOut || []).length, a = (view.soldOutOptions || []).length;
-  $('qc-soldout-count').textContent = (d + a) || 'None';
+  setSoldOutBadge(d + a);
   $('clear-all-row').style.display = d > 0 ? 'flex' : 'none';
   $('clear-all-addons-row').style.display = a > 0 ? 'flex' : 'none';
   renderQuickList();
@@ -3874,11 +4169,11 @@ function renderSheetList(drinks, filter = '') {
   }
 
   list.innerHTML = filtered.map(d => `
-    <div class="sheet-drink-item ${state.specialDrinkId === d.id ? 'selected' : ''}"
-         data-id="${d.id}" data-name="${escHtml(d.name)}">
+    <button type="button" class="sheet-drink-item ${state.specialDrinkId === d.id ? 'selected' : ''}"
+         data-id="${escHtml(d.id)}" data-name="${escHtml(d.name)}">
       <span>${escHtml(d.name)}</span>
       <span class="sheet-drink-cat">${escHtml(d.categoryLabel)}</span>
-    </div>`).join('');
+    </button>`).join('');
 
   list.querySelectorAll('.sheet-drink-item').forEach(item => {
     item.addEventListener('click', () => {
@@ -3905,10 +4200,17 @@ function openSheet() {
 function closeSheet() {
   $('sheet-overlay').classList.remove('open');
   $('sheet-overlay').style.display = 'none';
+  try { $('open-drink-picker').focus(); } catch (_) {}
 }
 
 $('sheet-overlay').addEventListener('click', e => {
   if (e.target === $('sheet-overlay')) closeSheet();
+});
+$('sheet-close').addEventListener('click', closeSheet);
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if ($('modal-overlay').classList.contains('open')) closeModal();
+  else if ($('sheet-overlay').classList.contains('open')) closeSheet();
 });
 
 $('sheet-search').addEventListener('input', e => {
@@ -3921,23 +4223,41 @@ $('sheet-search').addEventListener('input', e => {
 
 let modalConfirmCallback = null;
 
-function openModal(title, body, onConfirm) {
+let modalCancelCallback = null;
+let modalReturnFocus = null;
+
+/** The app's own confirm dialog. opts.okText = confirm button label (default "Confirm"). */
+function openModal(title, body, onConfirm, opts = {}) {
   $('modal-title').textContent = title;
   $('modal-body').textContent  = body;
+  $('modal-confirm').textContent = opts.okText || 'Confirm';
   modalConfirmCallback = onConfirm;
+  modalCancelCallback = opts.onCancel || null;
+  modalReturnFocus = document.activeElement;
   $('modal-overlay').classList.add('open');
   $('modal-overlay').style.display = 'flex';
+  setTimeout(() => $('modal-cancel').focus(), 30);
+}
+
+/** Promise form: resolves true on confirm, false on cancel. */
+function appConfirm(title, body, okText) {
+  return new Promise(resolve => openModal(title, body, () => resolve(true), { okText, onCancel: () => resolve(false) }));
 }
 
 function closeModal() {
   $('modal-overlay').classList.remove('open');
   $('modal-overlay').style.display = 'none';
   modalConfirmCallback = null;
+  const cancel = modalCancelCallback; modalCancelCallback = null;
+  if (cancel) cancel();
+  if (modalReturnFocus && modalReturnFocus.focus) { try { modalReturnFocus.focus(); } catch (_) {} }
+  modalReturnFocus = null;
 }
 
 $('modal-cancel').addEventListener('click', closeModal);
 $('modal-confirm').addEventListener('click', async () => {
   const cb = modalConfirmCallback;
+  modalCancelCallback = null; // confirmed, not cancelled
   closeModal();
   if (cb) await cb();
 });
@@ -3946,62 +4266,54 @@ $('modal-overlay').addEventListener('click', e => {
 });
 
 // ----------------------------------------------------------------
-// ANTHROPIC KEY — encrypted storage (same PBKDF2/AES-GCM as GitHub token)
+// TRAILER SECRETS — encrypted on this device with the PIN (same PBKDF2 +
+// AES-GCM as the GitHub token). Plaintext lives only in sessionStorage
+// (cleared on lock / tab close) and is sent ONLY to its own service:
+//   staff   (TB_SECRET)   -> tb-where.nicholasroper.workers.dev
+//   station (STATION_KEY) -> station.thirstybeaches.com
 // ----------------------------------------------------------------
 
-const LS_ANTH_CREDS = 'tb_anth_v1';   // encrypted Anthropic key store
-const SS_ANTH_KEY   = 'tb_anth_session'; // plaintext in sessionStorage only
+const SECRETS = {
+  staff:   { ls: 'tb_staff_v1',   ss: 'tb_staff_session',   label: 'Staff secret' },
+  station: { ls: 'tb_station_v1', ss: 'tb_station_session', label: 'Station key' },
+};
+// The Drink Lab used to call Anthropic from the phone with a key stored here.
+// It now runs on thirstybeaches.com (see labCallSite), so an old key is removed.
+const LS_ANTH_CREDS = 'tb_anth_v1';
+const SS_ANTH_KEY   = 'tb_anth_session';
 
-/**
- * Encrypt and store the Anthropic key with the session PIN.
- * We don't have the raw PIN at save-time; re-use the same PBKDF2 approach
- * by deriving a fresh salt/IV each time. The PIN required is the one already
- * in use for this session — we re-derive it from the stored GitHub token blob
- * to avoid asking the owner to re-enter their PIN. Instead we accept that we
- * need the PIN to save a new key. To keep UX simple: store with a known PIN
- * that we prompt for inline.
- *
- * Simpler path: re-use the same encrypted-blob pattern, but derive from a
- * static "app-level" passphrase that is not the PIN (less secure but pragmatic
- * for a second secret on the same device). HOWEVER — Scarlett's requirement is
- * that the PIN protects all secrets. So we store the Anthropic key encrypted
- * with the session PIN.
- *
- * Implementation: at save time we need the PIN. We ask for it once if not
- * cached in state. We cache it in state.sessionPin (memory only, cleared on
- * lock) alongside the session token.
- */
-
-/** Save plaintext Anthropic key encrypted with the given PIN. */
-async function storeAnthropicKey(pin, apiKey) {
-  const encrypted = await encryptToken(pin, apiKey);
-  localStorage.setItem(LS_ANTH_CREDS, JSON.stringify(encrypted));
+function dropLegacyAnthropicKey() {
+  try { localStorage.removeItem(LS_ANTH_CREDS); sessionStorage.removeItem(SS_ANTH_KEY); } catch (_) {}
 }
 
-/** Load Anthropic key into sessionStorage using the given PIN. Returns true on success. */
-async function loadAnthropicKey(pin) {
-  const raw = localStorage.getItem(LS_ANTH_CREDS);
-  if (!raw) return false;
-  try {
-    const key = await decryptToken(pin, JSON.parse(raw));
-    sessionStorage.setItem(SS_ANTH_KEY, key);
-    return true;
-  } catch (_) {
-    return false;
+async function storeSecret(name, pin, value) {
+  const def = SECRETS[name];
+  localStorage.setItem(def.ls, JSON.stringify(await encryptToken(pin, value)));
+  sessionStorage.setItem(def.ss, value);
+}
+
+async function loadSecrets(pin) {
+  for (const def of Object.values(SECRETS)) {
+    const raw = localStorage.getItem(def.ls);
+    if (!raw) continue;
+    try { sessionStorage.setItem(def.ss, await decryptToken(pin, JSON.parse(raw))); } catch (_) {}
   }
 }
 
-/** Get Anthropic key from session (null if not loaded). */
-function getAnthropicKey() {
-  return sessionStorage.getItem(SS_ANTH_KEY) || null;
+function getSecret(name) {
+  try { return sessionStorage.getItem(SECRETS[name].ss) || null; } catch (_) { return null; }
 }
 
-function hasStoredAnthropicKey() {
-  return !!localStorage.getItem(LS_ANTH_CREDS);
+function hasStoredSecret(name) {
+  try { return !!localStorage.getItem(SECRETS[name].ls); } catch (_) { return false; }
 }
 
-/** Clear Anthropic key from session (called on lock). */
-function clearAnthropicSession() {
+function forgetSecret(name) {
+  try { localStorage.removeItem(SECRETS[name].ls); sessionStorage.removeItem(SECRETS[name].ss); } catch (_) {}
+}
+
+function clearSecretSessions() {
+  for (const def of Object.values(SECRETS)) { try { sessionStorage.removeItem(def.ss); } catch (_) {} }
   sessionStorage.removeItem(SS_ANTH_KEY);
 }
 
@@ -4041,8 +4353,7 @@ const CAT_BASE_ITEM_IDS = {
 };
 
 const CAT_KEYS = ['floats','dirtysodas','newwaves','energy','lemonades','italian','dolewhip','coffee','beachbabies'];
-const LAB_MODEL = 'claude-haiku-4-5';
-const ANTH_VERSION = '2023-06-01';
+const LAB_URL  = 'https://thirstybeaches.com/api/lab';
 
 // Currently generated drink (pending publish)
 let labDrink = null;
@@ -4064,28 +4375,6 @@ function labBuildPaletteFromState() {
     LAB_PALETTE_IDS.add(a.id);
     LAB_ADDON_MAP.set(a.id, { name: a.name, d: typeof a.d === 'number' ? a.d : 0 });
   }
-}
-
-/**
- * Build the json_schema enum arrays for Claude's structured output.
- * All base ids (groupKey === 'base') go into baseEnum; all ids go into modEnum.
- */
-function labBuildSchema() {
-  labBuildPaletteFromState();
-  const allIds = [...(LAB_PALETTE_IDS || [])];
-  const baseIds = allIds.filter(id => id.startsWith('base:'));
-  return {
-    type: 'object',
-    properties: {
-      catKey: { type: 'string', enum: CAT_KEYS },
-      base:   { oneOf: [{ type: 'string', enum: baseIds }, { type: 'null' }] },
-      mods:   { type: 'array', items: { type: 'string', enum: allIds }, maxItems: 8 },
-      name:   { type: 'string', maxLength: 40 },
-      blurb:  { type: 'string', maxLength: 160 },
-    },
-    required: ['catKey', 'mods', 'name', 'blurb'],
-    additionalProperties: false,
-  };
 }
 
 // ----------------------------------------------------------------
@@ -4181,97 +4470,60 @@ function labComputePrice(catKey, base, mods) {
 }
 
 // ----------------------------------------------------------------
-// DRINK LAB — call Anthropic directly from the browser
+// DRINK LAB — ask the website (POST thirstybeaches.com/api/lab)
 // ----------------------------------------------------------------
+// The website holds the AI key. It lets this app in when the GitHub token
+// the app already has can push to the Control repo (it checks with GitHub
+// and never stores the token). The answer is NOT trusted: labValidate,
+// labModerate and labComputePrice below still run on it here.
 
-async function labCallAnthropic(brief) {
-  const apiKey = getAnthropicKey();
-  if (!apiKey) throw new Error('No Anthropic key');
-
-  labBuildPaletteFromState();
-
-  // Build palette text for the prompt
-  const paletteSummary = (() => {
-    if (!state.addons.length) return '(palette unavailable)';
-    const groups = {};
-    for (const a of state.addons) {
-      const gk = a.groupLabel;
-      if (!groups[gk]) groups[gk] = [];
-      groups[gk].push(a.name);
-    }
-    return Object.entries(groups).map(([g, names]) => `${g}: ${names.join(', ')}`).join('\n');
-  })();
-
-  const schema = labBuildSchema();
-
-  const prompt = [
-    'You are a creative drink inventor at "Thirsty Beaches," a beach-themed drink trailer.',
-    'Invent ONE drink that fits the owner\'s brief using ONLY ingredients from the palette below.',
-    'Pick a category (catKey), an optional base, and up to 6 mods by their exact palette id.',
-    'Give the drink a short punchy name (max 28 chars) and a one-line blurb (max 120 chars).',
-    '',
-    'Rules:',
-    '- Use ONLY ids from the palette list. Never invent ingredients.',
-    '- Keep it genuinely drinkable — do not pile on every modifier.',
-    '- Name and blurb must be family-appropriate for a public kiosk children use.',
-    '- Do not mention prices.',
-    '',
-    `Categories: ${CAT_KEYS.join(', ')}`,
-    '',
-    'Palette (id format is "groupKey:choiceName"):',
-    paletteSummary,
-    '',
-    `Owner brief: ${brief.slice(0, 140)}`,
-  ].join('\n');
-
-  const body = {
-    model: LAB_MODEL,
-    max_tokens: 512,
-    messages: [{ role: 'user', content: prompt }],
-    tools: [{
-      name: 'create_drink',
-      description: 'Return the invented drink as structured JSON.',
-      input_schema: schema,
-    }],
-    tool_choice: { type: 'tool', name: 'create_drink' },
-  };
-
-  const r = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'x-api-key': apiKey,
-      'anthropic-version': ANTH_VERSION,
-      'anthropic-dangerous-direct-browser-access': 'true',
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!r.ok) {
-    const txt = await r.text().catch(() => String(r.status));
-    if (r.status === 401) throw new Error('Invalid Anthropic key — check Settings');
-    if (r.status === 429) throw new Error('Rate limit — try again in a moment');
-    throw new Error(`Anthropic error ${r.status}: ${txt.slice(0, 120)}`);
+/** The palette the AI may use: every add-on id, its group key and name (deduped). */
+function labPalette() {
+  const seen = new Set(), out = [];
+  for (const a of state.addons) {
+    if (seen.has(a.id)) continue;
+    seen.add(a.id);
+    out.push({ id: a.id, group: a.groupKey, name: a.name });
   }
+  return out;
+}
 
-  const data = await r.json();
-
-  // Extract tool_use block
-  const toolBlock = (data.content || []).find(b => b.type === 'tool_use' && b.name === 'create_drink');
-  if (!toolBlock) throw new Error('Unexpected response from Anthropic');
-  return toolBlock.input; // raw, not yet validated
+async function labCallSite(brief) {
+  let token;
+  try { token = getSessionToken(); } catch (_) { throw new Error('Locked — unlock with your PIN and try again.'); }
+  labBuildPaletteFromState();
+  const palette = labPalette();
+  if (!palette.length) throw new Error('The add-on list has not loaded yet — tap Refresh on Today, then try again.');
+  let r;
+  try {
+    r = await fetch(LAB_URL, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ brief: brief.slice(0, 140), cats: CAT_KEYS, palette }),
+      cache: 'no-store',
+    });
+  } catch (_) {
+    throw new Error('Could not reach thirstybeaches.com — check your signal and tap Generate again.');
+  }
+  if (r.status === 401 || r.status === 403) throw new Error('The website did not accept this app\u2019s GitHub token (it needs write access to the Control repo). Check the token, then try again.');
+  if (r.status === 429) throw new Error('The Drink Lab is busy — wait a minute and try again.');
+  let data = null;
+  try { data = await r.json(); } catch (_) {}
+  if (!r.ok) throw new Error(`The Drink Lab had a problem (HTTP ${r.status}) — try again in a moment.`);
+  if (!data || data.ai !== true || !data.drink) {
+    const why = data && data.reason ? ` (${String(data.reason).slice(0, 40)})` : '';
+    throw new Error(`The AI didn\u2019t come up with a drink${why} — try again or reword the brief.`);
+  }
+  return data.drink; // raw, not yet validated
 }
 
 // ----------------------------------------------------------------
 // DRINK LAB — UI helpers
 // ----------------------------------------------------------------
 
+/** Entering the Drink Lab: nothing to unlock any more (the AI runs on the website). */
 function labRefreshKeyGate() {
-  const hasKey = !!getAnthropicKey();
-  $('lab-no-key').style.display     = hasKey ? 'none'  : '';
-  $('lab-input-section').style.display = hasKey ? '' : 'none';
-  $('lab-result').classList.remove('visible');
-  $('lab-specials-card').style.display = 'none';
+  $('lab-input-section').style.display = '';
 }
 
 function labSetError(msg) {
@@ -4324,7 +4576,7 @@ function renderLabSpecials() {
   list.innerHTML = specials.map(sp => `
     <div class="lab-special-row">
       <span class="lab-special-row-name">${escHtml(sp.name)}</span>
-      <span class="lab-special-row-price">$${Number(sp.price).toFixed(2)}</span>
+      ${Number.isFinite(Number(sp.price)) && sp.price !== null ? `<span class="lab-special-row-price">$${Number(sp.price).toFixed(2)}</span>` : ''}
       <button class="btn-lab-clear-sp" data-sp-id="${escHtml(sp.id)}">Remove</button>
     </div>`).join('');
   list.querySelectorAll('.btn-lab-clear-sp').forEach(btn => {
@@ -4348,7 +4600,7 @@ async function labGenerate() {
   $('btn-lab-regen').disabled = true;
 
   try {
-    const raw = await labCallAnthropic(brief);
+    const raw = await labCallSite(brief);
     const drink = labValidate(raw);
     if (!drink) throw new Error('The model returned an unworkable recipe — try a different brief.');
     labDrink = drink;
@@ -4461,7 +4713,7 @@ $('lab-name-edit').addEventListener('input', e => {
 // SETTINGS TAB
 // ----------------------------------------------------------------
 
-// Pre-fill health URL field and Anthropic key indicator
+// Pre-fill auto-lock, health URL and which secrets are saved
 function initSettingsTab() {
   const sel = $('lock-after-select');
   sel.value = String(lockAfterMs() / 60000);
@@ -4471,9 +4723,17 @@ function initSettingsTab() {
   });
   const url = localStorage.getItem(LS_HEALTH) || '';
   $('health-url-input').value = url;
-  // Show placeholder in Anthropic key field if a key is stored
-  if (hasStoredAnthropicKey()) {
-    $('anthropic-key-input').placeholder = 'Key stored — paste to update';
+  renderSecretStates();
+}
+
+function renderSecretStates() {
+  for (const name of Object.keys(SECRETS)) {
+    const el = $(`secret-${name}-state`);
+    if (!el) continue;
+    const stored = hasStoredSecret(name);
+    el.className = 'secret-state' + (stored ? ' on' : '');
+    el.textContent = stored ? 'Saved on this phone (encrypted). Type a new one to replace it.' : 'Not saved yet.';
+    $(`btn-forget-${name}`).style.display = stored ? '' : 'none';
   }
 }
 
@@ -4488,46 +4748,43 @@ $('btn-save-health-url').addEventListener('click', () => {
     localStorage.removeItem(LS_HEALTH);
     $('health-url-save-msg').textContent = 'URL cleared';
     setTimeout(() => $('health-url-save-msg').textContent = '', 2500);
-    setHealthBannerState('unknown', 'Uptime alerts not set up', 'Add a healthchecks.io URL in Settings');
+    $('health-banner').style.display = 'none';
   }
 });
 
-// Save Anthropic key (encrypted with the current session PIN)
-$('btn-save-anthropic-key').addEventListener('click', async () => {
-  const rawKey = $('anthropic-key-input').value.trim();
-  if (!rawKey) {
-    $('anthropic-key-save-msg').textContent = 'Paste a key first';
-    setTimeout(() => { $('anthropic-key-save-msg').textContent = ''; }, 2500);
-    return;
-  }
-  if (!rawKey.startsWith('sk-ant-')) {
-    $('anthropic-key-save-msg').textContent = 'Key should start with sk-ant-';
-    setTimeout(() => { $('anthropic-key-save-msg').textContent = ''; }, 3000);
-    return;
-  }
-  // We need the PIN to encrypt. We cache it at unlock time in state.sessionPin.
-  const pin = state.sessionPin;
-  if (!pin) {
-    $('anthropic-key-save-msg').textContent = 'Session expired — lock and re-enter PIN';
-    return;
-  }
-  try {
-    await storeAnthropicKey(pin, rawKey);
-    sessionStorage.setItem(SS_ANTH_KEY, rawKey);
-    $('anthropic-key-input').value = '';
-    $('anthropic-key-input').placeholder = 'Key stored — paste to update';
-    $('anthropic-key-save-msg').textContent = 'Key saved';
-    setTimeout(() => { $('anthropic-key-save-msg').textContent = ''; }, 2500);
-  } catch (err) {
-    $('anthropic-key-save-msg').textContent = `Save failed: ${err.message}`;
-  }
-});
+// Save / remove a trailer secret (encrypted with the current session PIN)
+function wireSecret(name) {
+  const input = $(`secret-${name}-input`), msg = $(`secret-${name}-msg`);
+  const say = (t, ms = 3000) => { msg.textContent = t; if (ms) setTimeout(() => { if (msg.textContent === t) msg.textContent = ''; }, ms); };
+  $(`btn-save-${name}`).addEventListener('click', async () => {
+    const v = input.value.trim();
+    if (!v) { say('Type it first'); return; }
+    if (v.length > 200 || /\s/.test(v)) { say('That does not look right (no spaces, under 200 characters)'); return; }
+    const pin = state.sessionPin;
+    if (!pin) { say('Lock the app, unlock with your PIN, then save again', 6000); return; }
+    try {
+      await storeSecret(name, pin, v);
+      input.value = '';
+      renderSecretStates();
+      say('Saved');
+      todayStale();
+    } catch (err) { say(`Save failed: ${err.message}`); }
+  });
+  $(`btn-forget-${name}`).addEventListener('click', () => {
+    openModal(`Remove ${SECRETS[name].label.toLowerCase()}?`,
+      'It is deleted from this phone. The Today screen shows less until you type it again.',
+      () => { forgetSecret(name); renderSecretStates(); say('Removed'); todayStale(); },
+      { okText: 'Remove' });
+  });
+}
+wireSecret('staff');
+wireSecret('station');
 
 $('btn-wipe').addEventListener('click', () => {
   openModal(
     'Wipe All Credentials',
-    'This removes your encrypted token, Anthropic key, and PIN from this device. You will need to re-enter them. The GitHub token itself is NOT revoked.',
-    () => wipeCredentials()
+    'This removes your encrypted GitHub token, staff secret, station key and PIN from this device. You will need to re-enter them. The GitHub token itself is NOT revoked.',
+    () => wipeCredentials(), { okText: 'Wipe' }
   );
 });
 
@@ -4596,20 +4853,36 @@ function kioskAgo(min) {
 }
 
 /**
- * GET the kiosk heartbeat. Returns { kind: 'ok', online, version, ageMin } |
+ * GET the kiosk heartbeat. Returns { kind: 'ok', online, version, ageMin, full, ... } |
  * { kind: 'none' } (404 / no reports yet) | { kind: 'error' }.
+ * With the staff secret saved it asks for ?full=1 (errors, safe mode, tap-to-pay);
+ * if the secret is refused it falls back to the public view and says so.
  */
 async function fetchKioskStatus() {
+  const staff = getSecret('staff');
+  let staffRejected = false;
   try {
-    const res = await fetch(KIOSK_STATUS_URL, { cache: 'no-store' });
-    if (res.status === 404) return { kind: 'none' };
+    let res = null;
+    if (staff) {
+      res = await fetch(KIOSK_STATUS_URL + '?full=1', { cache: 'no-store', headers: { 'Authorization': `Bearer ${staff}` } });
+      if (res.status === 401) { staffRejected = true; res = null; }
+    }
+    if (!res) res = await fetch(KIOSK_STATUS_URL, { cache: 'no-store' });
+    if (res.status === 404) return { kind: 'none', staffRejected };
     if (!res.ok) return { kind: 'error' };
     const d = await res.json();
-    if (!d || !d.lastSeen) return { kind: 'none' };
+    if (!d || !d.lastSeen) return { kind: 'none', staffRejected };
     let ageMin = typeof d.ageMin === 'number' ? d.ageMin : null;
     const t = Date.parse(d.lastSeen);
     if (ageMin == null && !isNaN(t)) ageMin = Math.max(0, Math.round((Date.now() - t) / 60000));
-    return { kind: 'ok', online: !!d.online, version: d.version, ageMin };
+    const full = !!staff && !staffRejected;
+    return {
+      kind: 'ok', online: !!d.online, version: d.version, ageMin, full, staffRejected,
+      errors: full && Array.isArray(d.errors) ? d.errors.slice(-3).map(String) : [],
+      safeMode: full && d.safeMode === true,
+      pay: full && d.pay && typeof d.pay === 'object' ? d.pay : null,
+      cloverError: full && d.clover && d.clover.lastError ? String(d.clover.lastError) : '',
+    };
   } catch (_) { return { kind: 'error' }; }
 }
 
@@ -4617,6 +4890,7 @@ async function renderKioskStatus() {
   const el = $('kiosk-remote-status');
   const st = await fetchKioskStatus();
   renderKioskStrip(st);
+  renderTodayKiosk(st);
   el.textContent = st.kind === 'ok'
     ? `Kiosk: ${st.online ? 'online' : 'OFFLINE'}${st.version ? ' · v' + st.version : ''} · seen ${kioskAgo(st.ageMin)}. Details: thirstybeaches.com/trailer`
     : st.kind === 'none'
@@ -4642,7 +4916,9 @@ function renderKioskStrip(st) {
 
 async function pollKioskStrip() {
   if (!sessionStorage.getItem(SS_TOKEN)) return;
-  renderKioskStrip(await fetchKioskStatus());
+  const st = await fetchKioskStatus();
+  renderKioskStrip(st);
+  renderTodayKiosk(st);
 }
 
 function renderKioskSettingsForm() {
@@ -4710,8 +4986,10 @@ async function sendKioskCommand(name, okText) {
 $('btn-kiosk-update').addEventListener('click', () => sendKioskCommand('checkUpdateAt', 'Sent · the kiosk checks for an update within ~2 min'));
 $('btn-kiosk-reload').addEventListener('click', () => sendKioskCommand('reloadScreenAt', 'Sent — the screen reloads the next time nobody is using it'));
 $('btn-kiosk-restart').addEventListener('click', () => {
-  if (!confirm('Restart the kiosk server? It waits until nobody is ordering, and is back in a few seconds.')) return;
-  sendKioskCommand('restartAt', 'Sent — restarts when the kiosk is idle');
+  openModal('Restart the kiosk server?',
+    'It waits until nobody is ordering, and is back in a few seconds.',
+    () => sendKioskCommand('restartAt', 'Sent — restarts when the kiosk is idle'),
+    { okText: 'Restart' });
 });
 $('btn-kiosk-settings-save').addEventListener('click', async () => {
   const msg = $('kiosk-settings-msg');
@@ -4720,7 +4998,7 @@ $('btn-kiosk-settings-save').addEventListener('click', async () => {
   if (errors.length) { msg.textContent = 'Fix: ' + errors.join(' · '); return; }
   const before = (controlView().settings || {});
   if (settings.PAY_ENABLED === true && before.PAY_ENABLED !== true &&
-      !confirm('Turn ON tap-to-pay at the kiosk? Customers will be asked to tap their card on the Flex. Only do this once the Flex is paired and tested.')) return;
+      !(await appConfirm('Turn on tap-to-pay?', 'Customers will be asked to tap their card on the Flex. Only do this once the Flex is paired and tested.', 'Turn on'))) return;
   msg.textContent = 'Saving…';
   try {
     await scheduleWrite(c => ({ ...c, settings }));
@@ -4728,6 +5006,236 @@ $('btn-kiosk-settings-save').addEventListener('click', async () => {
   } catch (err) { msg.textContent = `Save failed: ${err.message}`; }
   setTimeout(() => { msg.textContent = ''; }, 6000);
 });
+
+
+// ----------------------------------------------------------------
+// TODAY (first tab): kiosk, sales, sold out, special, quotes, punch cards
+// Every card loads on its own and fails on its own: a missing secret shows
+// a link to Settings, a network error shows Retry, nothing blocks the rest.
+// ----------------------------------------------------------------
+const TBW_BASE     = 'https://tb-where.nicholasroper.workers.dev';
+const STATION_BASE = 'https://station.thirstybeaches.com';
+const TRAILER_PAGE = 'https://thirstybeaches.com/trailer';
+const TODAY_REFRESH_MS = 5 * 60 * 1000;   // sales + quotes: at most every 5 min unless Nick taps Refresh
+
+const moneyCents = c => '$' + (Math.round(+c || 0) / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+
+/** fetch -> {ok, status, data, net}. Never throws; times out after 12 s. */
+async function getJson(url, opts = {}, timeoutMs = 12000) {
+  const ac = typeof AbortController === 'function' ? new AbortController() : null;
+  const timer = ac ? setTimeout(() => ac.abort(), timeoutMs) : null;
+  try {
+    const r = await fetch(url, { cache: 'no-store', ...opts, signal: ac ? ac.signal : undefined });
+    let data = null;
+    try { data = await r.json(); } catch (_) {}
+    return { ok: r.ok, status: r.status, data, net: false };
+  } catch (_) {
+    return { ok: false, status: 0, data: null, net: true };
+  } finally { if (timer) clearTimeout(timer); }
+}
+
+/** Local calendar date on this phone, YYYY-MM-DD. */
+function localDay(d = new Date()) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function needSecretHtml(what) {
+  return `<p class="t-msg">${escHtml(what)}</p>
+    <div class="t-row"><button class="t-btn" type="button" data-go-settings>Add your ${escHtml(what.includes('station') ? 'station key' : 'staff secret')} in Settings</button></div>`;
+}
+function retryHtml(msg, fn) {
+  return `<p class="t-msg t-warn">${escHtml(msg)}</p>
+    <div class="t-row"><button class="t-btn" type="button" data-retry="${fn}">Retry</button></div>`;
+}
+/** Wire the small buttons a card body may contain. */
+function wireTodayButtons(root) {
+  root.querySelectorAll('[data-go-settings]').forEach(b => b.addEventListener('click', goToSecrets));
+  root.querySelectorAll('[data-retry]').forEach(b => b.addEventListener('click', () => {
+    const fn = { kiosk: refreshTodayKiosk, sales: loadTodaySales, quotes: loadTodayQuotes }[b.dataset.retry];
+    if (fn) fn(true);
+  }));
+}
+function goToSecrets() {
+  switchTab('lock');
+  setTimeout(() => {
+    const card = $('secrets-card');
+    if (card) card.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }, 60);
+}
+function setCard(id, html) {
+  const el = $(id);
+  if (!el) return;
+  el.innerHTML = html;
+  wireTodayButtons(el);
+}
+
+// ---- Kiosk card (same /kiosk/status poll as the strip) -------------------
+function renderTodayKiosk(st) {
+  if (!$('t-kiosk-body')) return;
+  state.todayKioskAt = Date.now();
+  if (!st || st.kind === 'error') {
+    setCard('t-kiosk-body', retryHtml('Could not reach the kiosk status.', 'kiosk'));
+    return;
+  }
+  if (st.kind === 'none') {
+    setCard('t-kiosk-body', `<p class="t-msg">No status reports from the kiosk yet.</p>`);
+    return;
+  }
+  const head = `<div class="t-status ${st.online ? 'is-on' : 'is-off'}">
+      <span class="t-dot ${st.online ? 'on' : 'off'}" aria-hidden="true"></span>
+      <span>${st.online ? 'Online' : 'Offline'}</span>
+    </div>
+    <p class="t-sub">${st.version ? 'v' + escHtml(String(st.version)) + ' · ' : ''}${st.online ? 'seen' : 'last seen'} ${escHtml(kioskAgo(st.ageMin))}</p>`;
+  let extra = '';
+  if (st.full) {
+    const notes = [];
+    if (st.safeMode) notes.push('Safe mode: remote settings are being ignored');
+    if (st.pay) notes.push(`Tap-to-pay ${st.pay.enabled ? 'on' : 'off'}${st.pay.enabled ? (st.pay.flexConnected ? ' · Flex connected' : ' · Flex not connected') : ''}`);
+    if (st.cloverError) notes.push('Clover: ' + st.cloverError);
+    const errs = st.errors || [];
+    extra += notes.map(n => `<p class="t-sub">${escHtml(n)}</p>`).join('');
+    extra += errs.length
+      ? `<ul class="t-list t-errs" aria-label="Latest kiosk errors">${errs.map(e => `<li>${escHtml(truncate(e, 140))}</li>`).join('')}</ul>`
+      : `<p class="t-sub">No errors reported.</p>`;
+  } else if (st.staffRejected) {
+    extra = `<p class="t-msg t-warn">The staff secret saved on this phone was not accepted.</p>
+      <div class="t-row"><button class="t-btn" type="button" data-go-settings>Fix it in Settings</button></div>`;
+  } else if (!getSecret('staff')) {
+    extra = `<div class="t-row"><button class="t-btn" type="button" data-go-settings>Add your staff secret in Settings to see kiosk errors</button></div>`;
+  }
+  setCard('t-kiosk-body', head + extra);
+}
+async function refreshTodayKiosk() {
+  setCard('t-kiosk-body', `<p class="t-msg">Checking…</p>`);
+  await pollKioskStrip();
+}
+
+// ---- Sales card (station GET /api/report, X-Key = STATION_KEY) -----------
+async function loadTodaySales(force = false) {
+  const key = getSecret('station');
+  if (!key) { setCard('t-sales-body', needSecretHtml('Save the station key to see today’s sales.')); state.todaySalesAt = 0; return; }
+  if (!force && state.todaySalesAt && Date.now() - state.todaySalesAt < TODAY_REFRESH_MS) return;
+  state.todaySalesAt = Date.now();
+  if (!state.todaySalesData) setCard('t-sales-body', `<p class="t-msg">Loading…</p>`);
+  const day = localDay();
+  const r = await getJson(`${STATION_BASE}/api/report?day=${day}`, { headers: { 'X-Key': key } }, 30000);
+  if (r.net) { state.todaySalesAt = 0; setCard('t-sales-body', retryHtml('Could not reach the station.', 'sales')); return; }
+  if (r.status === 401) {
+    setCard('t-sales-body', `<p class="t-msg t-warn">The station did not accept the saved station key.</p>
+      <div class="t-row"><button class="t-btn" type="button" data-go-settings>Fix it in Settings</button></div>`);
+    return;
+  }
+  if (!r.ok || !r.data || typeof r.data.orders !== 'number') {
+    state.todaySalesAt = 0;
+    const why = r.data && r.data.error ? ` (${String(r.data.error).slice(0, 60)})` : ` (HTTP ${r.status})`;
+    setCard('t-sales-body', retryHtml('Sales are not available right now' + why + '.', 'sales'));
+    return;
+  }
+  state.todaySalesData = r.data;
+  const d = r.data;
+  const lines = [];
+  lines.push(`<p class="t-big">${escHtml(moneyCents(d.grossCents))}</p>`);
+  lines.push(`<p class="t-sub">${plural(d.orders, 'order')} · ${plural(d.drinks || 0, 'drink')}${d.orders ? ' · avg ' + escHtml(moneyCents(d.avgTicketCents)) : ''}${d.tipsCents ? ' · tips ' + escHtml(moneyCents(d.tipsCents)) : ''}</p>`);
+  if (d.orders && d.sources) lines.push(`<p class="t-sub">Kiosk ${+d.sources.kiosk || 0} · Phone ${+d.sources.phone || 0} · Register ${+d.sources.other || 0}</p>`);
+  if (Array.isArray(d.top) && d.top.length) lines.push(`<p class="t-sub">Top: ${d.top.map(t => `${escHtml(t.name)} ×${+t.count || 0}`).join(', ')}</p>`);
+  if (d.vsLastWeek && d.vsLastWeek.grossPct != null && d.lastWeek) {
+    const pct = +d.vsLastWeek.grossPct;
+    lines.push(`<p class="t-sub">vs same day last week: ${pct > 0 ? '+' : ''}${pct}% (${escHtml(moneyCents(d.lastWeek.grossCents))} all day)</p>`);
+  }
+  lines.push(`<p class="t-fine">Paid orders so far, before tax and tips · updated ${new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</p>`);
+  setCard('t-sales-body', lines.join(''));
+}
+
+// ---- Quotes card (tb-where GET /quotes, Bearer TB_SECRET) ----------------
+function fmtEventDate(ymd) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(ymd || ''));
+  if (!m) return String(ymd || '');
+  const dt = new Date(+m[1], +m[2] - 1, +m[3]);
+  return dt.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+}
+async function loadTodayQuotes(force = false) {
+  const staff = getSecret('staff');
+  if (!staff) { setCard('t-quotes-body', needSecretHtml('Save the staff secret to see quote requests.')); state.todayQuotesAt = 0; return; }
+  if (!force && state.todayQuotesAt && Date.now() - state.todayQuotesAt < TODAY_REFRESH_MS) return;
+  state.todayQuotesAt = Date.now();
+  if (!state.todayQuotesData) setCard('t-quotes-body', `<p class="t-msg">Loading…</p>`);
+  const r = await getJson(`${TBW_BASE}/quotes?limit=50`, { headers: { 'Authorization': `Bearer ${staff}` } });
+  if (r.net) { state.todayQuotesAt = 0; setCard('t-quotes-body', retryHtml('Could not reach the trailer server.', 'quotes')); return; }
+  if (r.status === 401) {
+    setCard('t-quotes-body', `<p class="t-msg t-warn">The trailer server did not accept the saved staff secret.</p>
+      <div class="t-row"><button class="t-btn" type="button" data-go-settings>Fix it in Settings</button></div>`);
+    return;
+  }
+  if (!r.ok || !r.data || !Array.isArray(r.data.quotes)) { state.todayQuotesAt = 0; setCard('t-quotes-body', retryHtml(`Quotes are not available right now (HTTP ${r.status}).`, 'quotes')); return; }
+  state.todayQuotesData = r.data;
+  const qs = r.data.quotes;
+  const by = { new: [], replied: [], booked: [], declined: [] };
+  for (const q of qs) (by[q.status] || by.new).push(q);
+  const waiting = by.new;
+  let html = `<p class="t-big">${waiting.length}<span class="t-big-unit"> waiting</span></p>`;
+  html += `<p class="t-sub">${by.replied.length} replied · ${by.booked.length} booked · ${by.declined.length} declined</p>`;
+  if (waiting.length) {
+    html += `<ul class="t-list" aria-label="Newest quote requests waiting">` + waiting.slice(0, 3).map(q => `
+      <li><b>${escHtml(q.name || 'Someone')}</b> · ${escHtml(q.event || 'Event')}<br>
+        <span>${escHtml(fmtEventDate(q.date))} · ${escHtml(truncate(q.city || '', 40))}${q.guests ? ' · ' + escHtml(q.guests) + ' guests' : ''}</span></li>`).join('') + `</ul>`;
+    if (waiting.length > 3) html += `<p class="t-sub">+ ${waiting.length - 3} more</p>`;
+  }
+  html += `<div class="t-row"><a class="t-btn t-btn-link" href="${TRAILER_PAGE}" target="_blank" rel="noopener">Reply on the trailer page ↗</a></div>`;
+  setCard('t-quotes-body', html);
+}
+
+// ---- Punch card by phone (tb-where GET /card/byphone, Bearer TB_SECRET) ---
+async function findCardByPhone(e) {
+  if (e) e.preventDefault();
+  const body = $('t-card-body');
+  const staff = getSecret('staff');
+  if (!staff) { setCard('t-card-body', needSecretHtml('Save the staff secret to look up punch cards.')); return; }
+  const digits = $('t-card-phone').value.replace(/\D/g, '');
+  const ten = digits.length === 11 && digits[0] === '1' ? digits.slice(1) : digits;
+  if (ten.length !== 10) { setCard('t-card-body', `<p class="t-msg t-warn">Type a 10-digit US phone number.</p>`); return; }
+  $('t-card-find').disabled = true;
+  setCard('t-card-body', `<p class="t-msg">Looking…</p>`);
+  const r = await getJson(`${TBW_BASE}/card/byphone?phone=${encodeURIComponent(ten)}`, { headers: { 'Authorization': `Bearer ${staff}` } });
+  $('t-card-find').disabled = false;
+  if (r.net) { setCard('t-card-body', `<p class="t-msg t-warn">Could not reach the trailer server. Check your signal and tap Find again.</p>`); return; }
+  if (r.status === 401) { setCard('t-card-body', `<p class="t-msg t-warn">The saved staff secret was not accepted.</p><div class="t-row"><button class="t-btn" type="button" data-go-settings>Fix it in Settings</button></div>`); return; }
+  if (r.status === 404) { setCard('t-card-body', `<p class="t-msg">No punch card is saved to that number.</p>`); return; }
+  if (r.status === 400) { setCard('t-card-body', `<p class="t-msg t-warn">That number does not look right. Type a 10-digit US number.</p>`); return; }
+  if (r.status === 429) { setCard('t-card-body', `<p class="t-msg t-warn">Too many lookups — wait a minute.</p>`); return; }
+  if (!r.ok || !r.data || !r.data.card) { setCard('t-card-body', `<p class="t-msg t-warn">Lookup failed (HTTP ${r.status}).</p>`); return; }
+  const c = r.data.card;
+  const punches = Math.max(0, +c.punches || 0), free = Math.max(0, +c.redeemed || 0);
+  const dots = Array.from({ length: 10 }, (_, i) => `<span class="t-punch${i < punches ? ' on' : ''}"></span>`).join('');
+  setCard('t-card-body', `
+    <p class="t-sub">Card for ···${escHtml(String(r.data.last4 || ten.slice(-4)))}</p>
+    <p class="t-big">${punches}<span class="t-big-unit"> of 10 punches</span></p>
+    <div class="t-punches" role="img" aria-label="${punches} of 10 punches">${dots}</div>
+    <p class="t-free${free ? ' on' : ''}">${free ? `${plural(free, 'free drink')} ready` : 'No free drink ready yet'}</p>`);
+}
+$('t-card-form').addEventListener('submit', findCardByPhone);
+
+// ---- The screen as a whole -----------------------------------------------
+function renderTodayDate() {
+  const el = $('today-date');
+  if (el) el.textContent = new Date().toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
+}
+/** Load what is stale (or everything when Nick taps Refresh). */
+function refreshToday(force = false) {
+  renderTodayDate();
+  if (force) { refreshAll(); refreshTodayKiosk(); }
+  else if (!state.todayKioskAt || Date.now() - state.todayKioskAt > 60_000) pollKioskStrip();
+  loadTodaySales(force);
+  loadTodayQuotes(force);
+  if (!getSecret('staff')) setCard('t-card-body', `<p class="t-fine t-needs">Needs the staff secret (Settings).</p>`);
+  else if ($('t-card-body').querySelector('[data-go-settings], .t-needs')) setCard('t-card-body', '');
+}
+/** A secret changed: forget cached results so Today reloads with it. */
+function todayStale() {
+  state.todaySalesAt = 0; state.todayQuotesAt = 0; state.todayKioskAt = 0;
+  state.todaySalesData = null; state.todayQuotesData = null;
+  if (state.activeTab === 'home') refreshToday();
+}
 
 // ----------------------------------------------------------------
 // UTILITY
