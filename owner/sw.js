@@ -4,7 +4,7 @@
 // It does NOT intercept GitHub API requests — those always hit the network
 // (write operations must never go through a cache).
 
-const CACHE_NAME = 'tb-control-o5-20261025';
+const CACHE_NAME = 'tb-control-today-20261025';
 
 // App shell assets to pre-cache (all relative to /owner/)
 const SHELL_ASSETS = [
@@ -12,6 +12,7 @@ const SHELL_ASSETS = [
   './index.html',
   './manifest.webmanifest?v=logo20261018',
   './logo.png?v=logo20261018',
+  './logo-480.webp?v=brand20261025',
   './icon-192.png?v=logo20261018',
   './icon-512.png?v=logo20261018',
   './icon-maskable.png?v=logo20261018',
@@ -35,6 +36,7 @@ self.addEventListener('activate', event => {
 });
 
 // Fetch strategy:
+// - Live data + AI (tb-where, station, thirstybeaches.com) → not touched (browser default, never cached)
 // - GitHub API (api.github.com) → network only, never cache
 // - Google Fonts → stale-while-revalidate (CSS/fonts only, never write)
 // - Same-origin assets → cache-first (app shell)
@@ -42,6 +44,13 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
+
+  // Today screen + Drink Lab: live, authenticated, never cached — let the browser handle them
+  if (url.hostname === 'tb-where.nicholasroper.workers.dev' ||
+      url.hostname === 'station.thirstybeaches.com' ||
+      url.hostname === 'thirstybeaches.com') {
+    return;
+  }
 
   // GitHub API: always network, never cache — writes must be live
   if (url.hostname === 'api.github.com') {
