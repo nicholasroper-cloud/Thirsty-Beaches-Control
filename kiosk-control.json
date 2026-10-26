@@ -6,5 +6,8 @@
  "healthcheckUrl": "https://hc-ping.com/12dd75eb-2c38-45e8-9e3f-6efce01a3f60",
  "settings": {
   "AI_DESIGN_ENABLED": true
+ },
+ "commands": {
+  "checkUpdateAt": "2026-10-26T00:17:39Z"
  }
 }
