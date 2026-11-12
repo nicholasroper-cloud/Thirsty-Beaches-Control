@@ -1,15 +1,15 @@
 {
  "soldOut": [],
  "special": null,
- "updated": "2026-11-12T01:51:43Z",
+ "updated": "2026-11-12T01:54:49Z",
  "soldOutOptions": [],
  "healthcheckUrl": "https://hc-ping.com/12dd75eb-2c38-45e8-9e3f-6efce01a3f60",
  "settings": {
   "AI_DESIGN_ENABLED": true
  },
  "commands": {
-  "checkUpdateAt": "2026-11-12T01:51:43Z",
-  "reloadScreenAt": "2026-11-12T01:53:43Z"
+  "checkUpdateAt": "2026-11-12T01:54:49Z",
+  "reloadScreenAt": "2026-11-12T01:56:49Z"
  },
  "greeter": {
   "enabled": true,
