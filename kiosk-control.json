@@ -1,7 +1,7 @@
 {
  "soldOut": [],
  "special": null,
- "updated": "2026-11-20T06:15:18Z",
+ "updated": "2026-11-20T07:18:53Z",
  "soldOutOptions": [],
  "healthcheckUrl": "https://hc-ping.com/12dd75eb-2c38-45e8-9e3f-6efce01a3f60",
  "settings": {
@@ -9,8 +9,8 @@
   "UPDATE_INTERVAL_MIN": 30
  },
  "commands": {
-  "checkUpdateAt": "2026-11-20T06:15:18Z",
-  "reloadScreenAt": "2026-11-20T06:18:18Z"
+  "checkUpdateAt": "2026-11-20T07:18:53Z",
+  "reloadScreenAt": "2026-11-20T07:21:53Z"
  },
  "greeter": {
   "enabled": false,
